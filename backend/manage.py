@@ -1,5 +1,5 @@
 from flask import jsonify
-from enums import ApplicationStatus, PetStatus#, Role i'll implement role stuff later 
+from enums import ApplicationStatus, PetStatus#, Role i'll implement role stuff later
 
 
 
