@@ -50,7 +50,8 @@ def logout_page():
     User logout route.
     It clears the session and redirects to the login page.
     """
-    return logout() #prob will change this to a redirect instead of just a json response, it works as a mock tho
+    #prob will change this to a redirect instead of just a json response, it works as a mock tho
+    return logout()
 
 @app.route('api/pets/create', methods=['POST'])
 @login_required(2)  # Requires at least STAFF role
