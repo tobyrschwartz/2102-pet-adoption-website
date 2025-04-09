@@ -1,7 +1,7 @@
 """The module containing all enums used in the application."""
-from enum import Enum
+from enum import Enum, IntEnum
 
-class Role(Enum):
+class Role(IntEnum):
     """
     Enum for user roles in the system.
     Each role has a corresponding permission level.
@@ -11,7 +11,7 @@ class Role(Enum):
     STAFF = 2 # any staff who works at the shelter
     ADMIN = 3 # highest permission level (can add and remove staff)
 
-class ApplicationStatus(Enum):
+class ApplicationStatus(str, Enum):
     """
     Enum for application statuses.
     Each status represents a stage in the application process.
@@ -20,7 +20,7 @@ class ApplicationStatus(Enum):
     APPROVED = "Approved" # application has been approved
     REJECTED = "Rejected" # application has been rejected
 
-class PetStatus(Enum):
+class PetStatus(str, Enum):
     """
     Enum for pet statuses.
     Each status represents the current state of a pet in the system.

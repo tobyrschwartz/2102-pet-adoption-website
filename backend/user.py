@@ -1,5 +1,4 @@
 """The module for managing user-related operations."""
-import json
 from flask import jsonify, session
 from enums import Role
 
@@ -116,13 +115,17 @@ def get_users_by_role(role: Role):
         "role": role
     }]
     return jsonify(users), 200
+
 def get_user_role(user_id: str):
     """
     Retrieve the role of a user by their ID.
     :param user_id: ID of the user to retrieve the role for
     :return: ENUM corresponding to the user's role
     """
-    user = json.load(get_user_by_id(user_id))
+    response, status = get_user_by_id(user_id)
+    if status != 200:
+        return Role.GUEST
+    user = response.json
     if user.get("role") == Role.ADMIN:
         return Role.ADMIN
     if user.get("role") == Role.STAFF:
@@ -130,6 +133,7 @@ def get_user_role(user_id: str):
     if user.get("role") == Role.USER:
         return Role.USER
     return Role.GUEST
+
 def login(email: str, password: str):
     """
     Log in a user with the given email and password.
@@ -138,13 +142,16 @@ def login(email: str, password: str):
     :param password: Password of the user
     :return: JSON response with the login status
     """
-    user = json.load(get_user_by_email(email))
-    if password is user.get("password_hash"):
+    response, status = get_user_by_email(email)
+    if status != 200:
+        return jsonify({"error": "Invalid email or password"}), 401
+    user = response.json
+    if password == user.get("password_hash"):
         pass # just need to use password to get pylint to stfu (it is a mock function)
     response = {
         "message": "Login successful",
         "user_id": user.get("user_id"),
-        "role": Role.ADMIN
+        "role": user.get("role"),
     }
     session['user_id'] = user.get("user_id")
     return jsonify(response), 200

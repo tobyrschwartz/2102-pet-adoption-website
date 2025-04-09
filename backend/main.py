@@ -1,3 +1,4 @@
+"""Main module of the application"""
 from flask import Flask, request, session, jsonify
 from user import login, get_user_role, logout
 
@@ -22,8 +23,8 @@ def login_required(min_permission):
 app = Flask(__name__)
 app.secret_key = "OFNDEWOWKDO<FO@" # random ahh key for now **change before production**
 app.config.update( # credits to https://flask.palletsprojects.com/en/2.3.x/quickstart/#sessions
-    SESSION_COOKIE_HTTPONLY=True,     
-    SESSION_COOKIE_SECURE=True,       
+    SESSION_COOKIE_HTTPONLY=True,
+    SESSION_COOKIE_SECURE=True,
     SESSION_COOKIE_SAMESITE='Lax'
 )
 
@@ -34,8 +35,9 @@ def login_page():
     POST: It checks the provided email and password against the database and sets the session
     GET: It returns the login page
     """
-    if request.method == 'POST': # **placeholder for the login page**
+    if request.method == 'POST':
         return login(request.form['email'], request.form['password'])
+    # **placeholder for the login page**
     return '''
         <form method="POST">
             Email: <input type="text" name="email"><br>
@@ -53,7 +55,7 @@ def logout_page():
     #prob will change this to a redirect instead of just a json response, it works as a mock tho
     return logout()
 
-@app.route('api/pets/create', methods=['POST'])
+@app.route('/api/pets/create', methods=['GET'])
 @login_required(2)  # Requires at least STAFF role
 def create_pet():
     """To be implemented, just wanted to check my decorator doesn't throw an error"""
