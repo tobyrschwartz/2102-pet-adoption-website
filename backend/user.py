@@ -1,4 +1,4 @@
-"""Needed for json processing"""
+"""The module for managing user-related operations."""
 import json
 from flask import jsonify
 from enums import Role
@@ -115,7 +115,20 @@ def get_users_by_role(role: Role):
         "role": role
     }]
     return jsonify(users), 200
-
+def get_user_role(user_id: str):
+    """
+    Retrieve the role of a user by their ID.
+    :param user_id: ID of the user to retrieve the role for
+    :return: ENUM corresponding to the user's role
+    """
+    user = json.load(get_user_by_id(user_id))
+    if user.get("role") == Role.ADMIN:
+        return Role.ADMIN
+    if user.get("role") == Role.STAFF:
+        return Role.STAFF
+    if user.get("role") == Role.USER:
+        return Role.USER
+    return Role.GUEST
 def login(email: str, password: str):
     """
     Log in a user with the given email and password.
