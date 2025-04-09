@@ -1,6 +1,6 @@
 """The module for managing user-related operations."""
 import json
-from flask import jsonify
+from flask import jsonify, session
 from enums import Role
 
 def create_user(email: str, passsword_hash: str, full_name: str, phone: str, role: Role):
@@ -22,6 +22,7 @@ def create_user(email: str, passsword_hash: str, full_name: str, phone: str, rol
         "phone": phone,
         "role": role
     }
+    session['user_id'] = new_user.get("user_id")
     return jsonify(new_user), 201
 
 def delete_user(user_id: int):
@@ -145,5 +146,17 @@ def login(email: str, password: str):
         "user_id": user.get("user_id"),
         "role": Role.ADMIN
     }
-    #implement sessions??? lowkey need to look into this
+    session['user_id'] = user.get("user_id")
+    return jsonify(response), 200
+
+def logout():
+    """
+    Log out the current user.
+    
+    :return: JSON response with the logout status
+    """
+    session.pop('user_id', None)
+    response = {
+        "message": "Logout successful"
+    }
     return jsonify(response), 200

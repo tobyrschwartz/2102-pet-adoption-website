@@ -2,7 +2,8 @@
 from flask import jsonify
 from enums import ApplicationStatus, PetStatus#, Role i'll implement role stuff later
 
-def create_pet(name: str, species: str, breed: str, age: int, size, status: PetStatus): # **this is a mock function**
+def create_pet(name: str, species: str, breed: str, age: int, size, status: PetStatus):
+    # **this is a mock function**
     """
     Create a new pet with the given details.
     

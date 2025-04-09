@@ -1,5 +1,5 @@
+"""The module containing all enums used in the application."""
 from enum import Enum
-
 
 class Role(Enum):
     """

@@ -1,5 +1,5 @@
 from flask import Flask, request, session, jsonify
-from user import login, get_user_role
+from user import login, get_user_role, logout
 
 def login_required(min_permission):
     """
@@ -21,6 +21,11 @@ def login_required(min_permission):
 
 app = Flask(__name__)
 app.secret_key = "OFNDEWOWKDO<FO@" # random ahh key for now **change before production**
+app.config.update( # credits to https://flask.palletsprojects.com/en/2.3.x/quickstart/#sessions
+    SESSION_COOKIE_HTTPONLY=True,     
+    SESSION_COOKIE_SECURE=True,       
+    SESSION_COOKIE_SAMESITE='Lax'
+)
 
 @app.route('/login', methods=['GET','POST'])
 def login_page():
@@ -38,6 +43,14 @@ def login_page():
             <input type="submit" value="Login">
         </form>
         '''
+
+@app.route('/logout', methods=['GET'])
+def logout_page():
+    """
+    User logout route.
+    It clears the session and redirects to the login page.
+    """
+    return logout() #prob will change this to a redirect instead of just a json response, it works as a mock tho
 
 @app.route('api/pets/create', methods=['POST'])
 @login_required(2)  # Requires at least STAFF role
