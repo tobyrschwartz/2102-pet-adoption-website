@@ -1,8 +1,6 @@
-# pylint: disable=import-error
 """Tests for main.py"""
 
 # pylint: disable=W0621
-import sqlite3
 from unittest.mock import patch
 import pytest
 from main import app
@@ -12,17 +10,8 @@ from main import app
 def client():
     """Creates a test user for the Flask app"""
     app.testing = True
-    with app.test_client as client:
-        clear_test_user()
-        yield client
-
-def clear_test_user():
-    """Clear existing test user in database"""
-    conn = sqlite3.connect('pets_adoption.db')
-    cursor = conn.cursor()
-    cursor.execute("DELETE FROM users WHERE usernam= 'test';")
-    conn.commit()
-    conn.close()
+    client = app.test_client()
+    return client
 
 def test_create_user(client):
     """Test user registration"""
@@ -38,36 +27,33 @@ def mock_get_user_role():
 
 def test_not_logged_in(client):
     """Tests if a user is not logged in"""
-    with client:
-        response = client.get('/protected')
-        assert response.status_code == 401
-        assert response.json == {"error": "You must log in"}
+    response = client.get('/protected')
+    assert response.status_code == 401
+    assert response.json == {"error": "You must log in"}
 
 def test_not_logged_in_2(client, mock_get_user_role):
     """Tests when the user is not logged in"""
     mock_get_user_role.return_value = 1
 
     # Logged in user
-    with client:
-        with client.session_transaction() as session:
-            session['user_id'] = 123
+    with client.session_transaction() as session:
+        session['user_id'] = 123
 
-        response = client.get('/protected')
-        assert response.status_code == 403
-        assert response.json == {"error": "You do not have permission to access this resource"}
+    response = client.get('/protected')
+    assert response.status_code == 403
+    assert response.json == {"error": "You do not have permission to access this resource"}
 
 def test_logged_in(client, mock_get_user_role):
     """Tests when the user is logged in"""
     mock_get_user_role.return_value = 2
 
     # Logged in user
-    with client:
-        with client.session_transaction() as session:
-            session['user_id'] = 123
+    with client.session_transaction() as session:
+        session['user_id'] = 123
 
-        response = client.get('/protected')
-        assert response.status_code == 200
-        assert response.json == {"message": "You have access"}
+    response = client.get('/protected')
+    assert response.status_code == 200
+    assert response.json == {"message": "You have access"}
 
 def test_home_page(client):
     """Tests homepage accessibility"""
