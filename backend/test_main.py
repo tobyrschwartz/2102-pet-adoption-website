@@ -1,16 +1,19 @@
-# pylint: disable=W0621
+# pylint: disable=import-error
+"""Tests for main.py"""
 
-from main import app, decorator_login
-from flask import jsonify, session
+# pylint: disable=W0621
+import sqlite3
 from unittest.mock import patch
-import pytest, sqlite3
+import pytest
+from main import app
+
 
 @pytest.fixture
 def client():
     """Creates a test user for the Flask app"""
-    app.testing = True 
+    app.testing = True
     with app.test_client as client:
-        clear_test_user()  
+        clear_test_user()
         yield client
 
 def clear_test_user():
@@ -40,7 +43,7 @@ def test_not_logged_in(client):
         assert response.status_code == 401
         assert response.json == {"error": "You must log in"}
 
-def test_not_logged_in(client, mock_get_user_role):
+def test_not_logged_in_2(client, mock_get_user_role):
     """Tests when the user is not logged in"""
     mock_get_user_role.return_value = 1
 
@@ -91,7 +94,6 @@ def test_login(mock_login, client):
         </form>
         '''
     response = client.post('/login', data={'email': 'test@example.com', 'password': 'secret'})
-    
     assert response.status_code == 200
     mock_login.assert_called_once_with('test@example.com', 'secret')
     assert b"Logged in" in response.data
@@ -102,14 +104,13 @@ def test_logout(mock_logout, client):
     """Tests logging out"""
     mock_logout.return_value = "Logged out"
     response = client.get('/logout')
-    
     assert response.status_code == 200
     mock_logout.assert_called_once()
     assert b"Logged out" in response.data
 
 
 @patch('main.get_user_role')
-def test_create_pet_no_auth(mock_get_user_role, client):
+def test_create_pet_no_auth(client):
     """Tests creating a pet without being logged in"""
     response = client.get('/api/pets/create')
     assert response.status_code == 401
@@ -132,7 +133,7 @@ def test_create_pet_no_permission(mock_get_user_role, client):
 @patch('main.get_user_role')
 def test_create_pet_success(mock_get_user_role, client):
     """Tests that we can create a pet (if we have admin permission)"""
-    mock_get_user_role.return_value = 2 
+    mock_get_user_role.return_value = 2
 
     with client.session_transaction() as sess:
         sess['user_id'] = 1
