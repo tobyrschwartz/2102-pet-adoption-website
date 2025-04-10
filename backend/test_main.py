@@ -1,3 +1,5 @@
+# pylint: disable=W0621
+
 from main import app, decorator_login
 from flask import jsonify, session
 from unittest.mock import patch
