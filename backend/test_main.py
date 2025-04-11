@@ -27,7 +27,7 @@ def test_create_user(client):
         sess['user_id'] = 1  # Simulating an admin user
     # Mock get_user_role to return ADMIN
     with patch('main.get_user_role') as mock_role:
-        mock_role.return_value = Role.ADMIN 
+        mock_role.return_value = Role.ADMIN
         # Now make the request
         response = client.post('/api/users', json={'username': 'test', 'password': 'test'})
         assert response.status_code == 201
