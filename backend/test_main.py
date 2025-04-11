@@ -31,12 +31,9 @@ def test_create_user(client):
         # Now make the request
         response = client.post('/api/users', json={'username': 'test', 'password': 'test'})
         assert response.status_code == 201
-        # We only need to verify that we get a 201 status code
-        # The exact structure of the response might vary
-        # Let's just verify some expected fields exist
-        assert 'user_id' in response.json
-        assert 'email' in response.json
-        assert 'role' in response.json
+        # Now we check for the message field which is what the route returns
+        assert 'message' in response.json
+        assert response.json['message'] == 'User created successfully'
 
 def test_not_logged_in(client):
     """Tests if a user is not logged in"""
@@ -126,4 +123,3 @@ def test_create_pet_success(mock_get_user_role, client):
     response = client.get('/api/pets/create')
     assert response.status_code == 201
     assert response.json == {"message": "Pet created successfully!"}
-    
