@@ -1,6 +1,7 @@
 """The module for managing pet-related API operations."""
 from flask import jsonify, request
 from enums import PetStatus
+from mock_data import get_mock_pet, get_mock_pet_list, BUDDY_PET
 
 def get_all_pets():
     """
@@ -9,28 +10,7 @@ def get_all_pets():
     :return: JSON response with a list of all pets
     """
     # This is a mock function
-    pets = [
-        {
-            "pet_id": 1,
-            "name": "Buddy",
-            "species": "Dog",
-            "breed": "Golden Retriever",
-            "age": 3,
-            "description": "Friendly and energetic medium-sized dog",
-            "status": PetStatus.AVAILABLE,
-            "image_url": "https://example.com/pet1.jpg"
-        },
-        {
-            "pet_id": 2,
-            "name": "Whiskers",
-            "species": "Cat",
-            "breed": "Tabby",
-            "age": 2,
-            "description": "Calm and affectionate small-sized cat",
-            "status": PetStatus.AVAILABLE,
-            "image_url": "https://example.com/pet2.jpg"
-        }
-    ]
+    pets = get_mock_pet_list()
     return jsonify(pets), 200
 
 def get_pet(pet_id):
@@ -41,16 +21,7 @@ def get_pet(pet_id):
     :return: JSON response with the pet details
     """
     # This is a mock function
-    pet = {
-        "pet_id": pet_id,
-        "name": "Buddy",
-        "species": "Dog",
-        "breed": "Golden Retriever",
-        "age": 3,
-        "description": "Friendly and energetic medium-sized dog",
-        "status": PetStatus.AVAILABLE,
-        "image_url": "https://example.com/pet1.jpg"
-    }
+    pet = get_mock_pet(pet_id)
     return jsonify(pet), 200
 
 def create_pet():
@@ -76,18 +47,19 @@ def create_pet():
 def update_pet(pet_id):
     """
     Update a pet with the given details from the request.
-    
+
     :param pet_id: ID of the pet to update
     :return: JSON response with the updated pet details
     """
     # This is a mock function
     data = request.json
+    pet_data = BUDDY_PET.copy()
     updated_pet = {
         "pet_id": pet_id,
-        "name": data.get("name", "Buddy"),
-        "species": data.get("species", "Dog"),
-        "breed": data.get("breed", "Golden Retriever"),
-        "age": data.get("age", 3),
+        "name": data.get("name", pet_data["name"]),
+        "species": data.get("species", pet_data["species"]),
+        "breed": data.get("breed", pet_data["breed"]),
+        "age": data.get("age", pet_data["age"]),
         "description": data.get("description", "Friendly dog"),
         "status": data.get("status", PetStatus.AVAILABLE),
         "image_url": data.get("image_url", "https://example.com/pet1.jpg")
@@ -115,22 +87,11 @@ def search_pets():
     :return: JSON response with matching pets
     """
     # This is a mock function
-    # In a real implementation, we would parse query parameters
-    # like species, breed, age range, etc.
     species = request.args.get("species", "")
     breed = request.args.get("breed", "")
     status = request.args.get("status", PetStatus.AVAILABLE)
-    # Just mocked results for now
-    pets = [
-        {
-            "pet_id": 1,
-            "name": "Buddy",
-            "species": "Dog" if species == "Dog" or not species else species,
-            "breed": "Golden Retriever" if breed == "Golden Retriever" or not breed else breed,
-            "age": 3,
-            "description": "Friendly and energetic medium-sized dog",
-            "status": status,
-            "image_url": "https://example.com/pet1.jpg"
-        }
-    ]
-    return jsonify(pets), 200
+    # Modify a copy of the pet data
+    pet = get_mock_pet(1, status)
+    pet["species"] = species if species else pet["species"]
+    pet["breed"] = breed if breed else pet["breed"]
+    return jsonify([pet]), 200

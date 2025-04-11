@@ -1,6 +1,7 @@
 """The module for handling pet adoption applications."""
 from flask import jsonify
 from enums import ApplicationStatus
+from mock_data import get_mock_application, get_mock_application_list
 
 def create_application(user_id: int, pet_id: int, application_data: dict):
     """
@@ -32,19 +33,12 @@ def get_application(application_id: int):
     :return: JSON response with the application details
     """
     # This is a mock function
-    application = {
-        "application_id": application_id,
-        "user_id": 1,
-        "pet_id": 1,
-        "submit_date": "2025-04-01",
-        "status": ApplicationStatus.PENDING,
-        "reviewer_id": None,
-        "review_date": None,
-        "application_data": {
-            "housing_type": "Apartment",
-            "has_yard": False,
-            "previous_experience": True
-        }
+    application = get_mock_application(application_id)
+    # Add application_data for this specific endpoint
+    application["application_data"] = {
+        "housing_type": "Apartment",
+        "has_yard": False,
+        "previous_experience": True
     }
     return jsonify(application), 200
 
@@ -74,26 +68,7 @@ def get_user_applications(user_id: int):
     :return: JSON response with a list of the user's applications
     """
     # This is a mock function
-    applications = [
-        {
-            "application_id": 1,
-            "user_id": user_id,
-            "pet_id": 1,
-            "submit_date": "2025-04-07",
-            "status": ApplicationStatus.PENDING,
-            "reviewer_id": None,
-            "review_date": None
-        },
-        {
-            "application_id": 2,
-            "user_id": user_id,
-            "pet_id": 2,
-            "submit_date": "2025-04-01",
-            "status": ApplicationStatus.APPROVED,
-            "reviewer_id": 3,
-            "review_date": "2025-04-07"
-        }
-    ]
+    applications = get_mock_application_list(user_id)
     return jsonify(applications), 200
 
 def get_applications_by_status(status: ApplicationStatus):
@@ -104,15 +79,5 @@ def get_applications_by_status(status: ApplicationStatus):
     :return: JSON response with a list of applications matching the status
     """
     # This is a mock function
-    applications = [
-        {
-            "application_id": 1,
-            "user_id": 1,
-            "pet_id": 1,
-            "submit_date": "2025-04-07",
-            "status": status,
-            "reviewer_id": None,
-            "review_date": None
-        }
-    ]
+    applications = get_mock_application_list(status=status)
     return jsonify(applications), 200
