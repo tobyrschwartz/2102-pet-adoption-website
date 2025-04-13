@@ -1,4 +1,5 @@
 """Main module of the application"""
+from sys import argv
 from flask import Flask, request, session, jsonify
 from user import (login, get_user_role, logout, create_user,
                  get_all_users, get_user_by_id)
@@ -6,6 +7,7 @@ from pets import (get_all_pets, get_pet, create_pet as create_pet_handler,
                  update_pet, delete_pet, search_pets)
 from apply import (create_application, get_application, update_application_status,
                   get_user_applications, get_applications_by_status)
+from database import init_db
 from enums import Role
 
 def login_required(min_permission):
@@ -209,4 +211,9 @@ def protected_route():
     return {"message": "You have access"}, 200
 
 if __name__ == '__main__':
+    if len(argv) > 1 and argv[1] == '--database-init':
+        init_db(first_run=True)
+        print("Database being (re)created.")
+    else:
+        init_db()
     app.run(debug=True)
