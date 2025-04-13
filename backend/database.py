@@ -92,7 +92,7 @@ def init_db(db_name="petadoption.db", first_run=False):
                     ('Larry', 'Dog', 'Golden Retriever', 3, 'Friendly and energetic.', 'Available', 'http://example.com/Larry.jpg'),
                     ('Barry', 'Cat', 'Siamese', 2, 'Loves to cuddle.', 'Adopted', 'http://example.com/Barry.jpg'),
                     ('Garry', 'Dog', 'Beagle', 4, 'Great with kids.', 'Available', 'http://example.com/Garry.jpg')
-                    ''')                       
+                    ''')
 
     connection.commit()
     connection.close()
