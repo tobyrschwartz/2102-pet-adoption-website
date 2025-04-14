@@ -1,17 +1,59 @@
-"""The module for managing pet-related API operations."""
-from flask import jsonify, request
+"""The module for managing pet-related operations."""
+import sqlite3
+from flask import jsonify
 from enums import PetStatus
-from mock_data import get_mock_pet, get_mock_pet_list, BUDDY_PET
 
-def get_all_pets():
+def get_db_connection():
     """
-    Retrieve all pets in the system.
+    Create a database connection to the SQLite database.
+    :return: SQLite connection object
+    """
+    conn = sqlite3.connect('petadoption.db')
+    conn.row_factory = sqlite3.Row  # Allows accessing columns by name
+    return conn
+
+def create_pet(pet_data):
+    """
+    Create a new pet with the given details.
     
-    :return: JSON response with a list of all pets
+    :param pet_data: Dictionary containing pet details with the following keys:
+                    - name: Name of the pet
+                    - species: Species of the pet (e.g., Dog, Cat)
+                    - breed: Breed of the pet
+                    - age: Age of the pet in years
+                    - description: Description including size and other details
+                    - status: (optional) Adoption status of the pet
+    :return: JSON response with the created pet details
     """
-    # This is a mock function
-    pets = get_mock_pet_list()
-    return jsonify(pets), 200
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute('''
+        INSERT INTO pets (name, species, breed, age, description, status)
+        VALUES (?, ?, ?, ?, ?, ?)
+    ''', (pet_data['name'], pet_data['species'], pet_data['breed'], pet_data['age'],
+            pet_data['description'], pet_data.get('status', PetStatus.AVAILABLE)))
+    conn.commit()
+    pet_id = cursor.lastrowid
+    conn.close()
+    new_pet = {'pet_id': pet_id}
+
+    return jsonify(new_pet), 201
+
+def delete_pet(pet_id):
+    """
+    Delete a pet with the given ID.
+    
+    :param pet_id: ID of the pet to delete
+    :return: JSON response indicating success or failure
+    """
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute('DELETE FROM pets WHERE pet_id = ?', (pet_id,))
+    conn.commit()
+    conn.close()
+    if cursor.rowcount == 0:
+        return jsonify({"error": "Pet not found"}), 404
+    return jsonify({"message": "Pet deleted successfully"}), 200
 
 def get_pet(pet_id):
     """
@@ -20,78 +62,102 @@ def get_pet(pet_id):
     :param pet_id: ID of the pet to retrieve
     :return: JSON response with the pet details
     """
-    # This is a mock function
-    pet = get_mock_pet(pet_id)
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute('SELECT * FROM pets WHERE pet_id = ?', (pet_id,))
+    pet = cursor.fetchone()
+    conn.close()
+    if pet is None:
+        return jsonify({"error": "Pet not found"}), 404
+    pet = dict(pet)
     return jsonify(pet), 200
 
-def create_pet():
+def get_all_pets():
     """
-    Create a new pet with the given details from the request.
+    Retrieve all pets.
     
-    :return: JSON response with the created pet details
+    :return: JSON response with a list of pets
     """
-    # This is a mock function
-    data = request.json
-    new_pet = {
-        "pet_id": 3,
-        "name": data.get("name"),
-        "species": data.get("species"),
-        "breed": data.get("breed"),
-        "age": data.get("age"),
-        "description": data.get("description"),
-        "status": PetStatus.AVAILABLE,
-        "image_url": data.get("image_url", "")
-    }
-    return jsonify(new_pet), 201
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute('SELECT * FROM pets')
+    pets = cursor.fetchall()
+    conn.close()
+    if not pets:
+        return jsonify({"error": "No pets found"}), 404
+    # Convert pets to a list of dictionaries
+    pets = [dict(pet) for pet in pets]
+    return jsonify(pets), 200
 
-def update_pet(pet_id):
+def update_pet_status(pet_id, status):
+    """
+    Update the status of a pet.
+    
+    :param pet_id: ID of the pet to update
+    :param status: New status for the pet
+    :return: JSON response with the updated pet details
+    """
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute('UPDATE pets SET status = ? WHERE pet_id = ?', (status, pet_id))
+    conn.commit()
+    cursor.execute('SELECT * FROM pets WHERE pet_id = ?', (pet_id,))
+    updated_pet = cursor.fetchone()
+    conn.close()
+    if updated_pet is None:
+        return jsonify({"error": "Pet not found"}), 404
+    updated_pet = dict(updated_pet)
+    return jsonify(updated_pet), 200
+
+def update_pet(pet_data):
     """
     Update a pet with the given details from the request.
 
     :param pet_id: ID of the pet to update
     :return: JSON response with the updated pet details
     """
-    # This is a mock function
-    data = request.json
-    pet_data = BUDDY_PET.copy()
-    updated_pet = {
-        "pet_id": pet_id,
-        "name": data.get("name", pet_data["name"]),
-        "species": data.get("species", pet_data["species"]),
-        "breed": data.get("breed", pet_data["breed"]),
-        "age": data.get("age", pet_data["age"]),
-        "description": data.get("description", "Friendly dog"),
-        "status": data.get("status", PetStatus.AVAILABLE),
-        "image_url": data.get("image_url", "https://example.com/pet1.jpg")
-    }
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute('''
+        UPDATE pets SET (name, species, breed, age, description, status)
+        VALUES (?, ?, ?, ?, ?, ?) WHERE pet_id = ?
+    ''', (pet_data['name'], pet_data['species'], pet_data['breed'], pet_data['age'],
+            pet_data['description'], pet_data.get('status', PetStatus.AVAILABLE),
+            pet_data['pet_id']))
+    conn.commit()
+    cursor.execute('SELECT * FROM pets WHERE pet_id = ?', (pet_data['pet_id'],))
+    updated_pet = cursor.fetchone()
+    conn.close()
+    if updated_pet is None:
+        return jsonify({"error": "Pet not found"}), 404
+    updated_pet = dict(updated_pet)
     return jsonify(updated_pet), 200
 
-def delete_pet(pet_id):
-    """
-    Delete a pet from the system.
-    
-    :param pet_id: ID of the pet to delete
-    :return: JSON response with a success message
-    """
-    # This is a mock function
-    response = {
-        "message": "Pet deleted successfully",
-        "pet_id": pet_id
-    }
-    return jsonify(response), 200
-
-def search_pets():
+def search_pets(species: str = "", breed: str = "", status: PetStatus = PetStatus.AVAILABLE):
     """
     Search for pets based on query parameters.
     
     :return: JSON response with matching pets
     """
-    # This is a mock function
-    species = request.args.get("species", "")
-    breed = request.args.get("breed", "")
-    status = request.args.get("status", PetStatus.AVAILABLE)
-    # Modify a copy of the pet data
-    pet = get_mock_pet(1, status)
-    pet["species"] = species if species else pet["species"]
-    pet["breed"] = breed if breed else pet["breed"]
-    return jsonify([pet]), 200
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    query = "SELECT * FROM pets WHERE 1=1"
+    params = []
+    if species:
+        query += " AND species = ?"
+        params.append(species)
+    if breed:
+        query += " AND breed = ?"
+        params.append(breed)
+    if status:
+        query += " AND status = ?"
+        params.append(status)
+    cursor.execute(query, params)
+    pets = cursor.fetchall()
+    conn.close()
+    if not pets:
+        return jsonify({"error": "No pets found meeting that criteria!"}), 404
+    # Convert pets to a list of dictionaries
+    pets = [dict(pet) for pet in pets]
+
+    return jsonify([pets]), 200
