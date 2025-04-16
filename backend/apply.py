@@ -1,8 +1,19 @@
 """The module for handling pet adoption applications."""
+import sqlite3
 from flask import jsonify
 from enums import ApplicationStatus
 from mock_data import get_mock_application, get_mock_application_list
 
+def get_db_connection():
+    """
+    Create a database connection to the SQLite database.
+    :return: SQLite connection object
+    """
+    conn = sqlite3.connect('petadoption.db')
+    conn.row_factory = sqlite3.Row  # Allows accessing columns by name
+    return conn
+
+# @ future us: we need to refactor this class to follow the ER diagram we created
 def create_application(user_id: int, pet_id: int, application_data: dict):
     """
     Create a new adoption application for a pet.
@@ -12,7 +23,6 @@ def create_application(user_id: int, pet_id: int, application_data: dict):
     :param application_data: Additional application data (housing info, experience, etc.)
     :return: JSON response with the created application details
     """
-    # This is a mock function
     new_application = {
         "application_id": 1,
         "user_id": user_id,
@@ -78,6 +88,13 @@ def get_applications_by_status(status: ApplicationStatus):
     :param status: Status of the applications to retrieve
     :return: JSON response with a list of applications matching the status
     """
-    # This is a mock function
-    applications = get_mock_application_list(status=status)
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute('''
+        SELECT * FROM applications WHERE status = ?
+    ''', (status,))
+    applications = cursor.fetchall()
+    conn.close()
+
+    applications = [dict(row) for row in applications]
     return jsonify(applications), 200

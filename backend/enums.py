@@ -20,6 +20,15 @@ class ApplicationStatus(str, Enum):
     APPROVED = "Approved" # application has been approved
     REJECTED = "Rejected" # application has been rejected
 
+class QuestionType(str, Enum):
+    """
+    Enum for question types in the application form.
+    Each type represents a different kind of question.
+    """
+    TEXT = "Text" # open-ended text response
+    YES_NO = "Yes/No" # yes or no question
+    MULTIPLE_CHOICE = "Multiple Choice" # multiple choice question
+
 class PetStatus(str, Enum):
     """
     Enum for pet statuses.
