@@ -56,6 +56,8 @@ def init_db(db_name="petadoption.db", first_run=False):
                     status TEXT NOT NULL DEFAULT 'Pending',
                     submitted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                     updated_at TIMESTAMP,
+                    reviewed_at TIMESTAMP,
+                    reviewer_id INTEGER,
                     FOREIGN KEY (user_id) REFERENCES users(user_id),
                     FOREIGN KEY (pet_id) REFERENCES pets(pet_id)
                 )
