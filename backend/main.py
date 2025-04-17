@@ -1,12 +1,6 @@
 """Main module of the application"""
 from flask import Flask, request, session, jsonify
-from user import (login, get_user_role, logout, create_user,
-                 get_all_users, get_user_by_id)
-from pets import (get_all_pets, get_pet, create_pet as create_pet_handler,
-                 update_pet, delete_pet, search_pets)
-from apply import (create_application, get_application, update_application_status,
-                  get_user_applications, get_applications_by_status)
-from enums import Role
+from user import login, get_user_role, logout
 
 def login_required(min_permission):
     """
@@ -41,6 +35,21 @@ def login_page():
     User login route.
     POST: It checks the provided email and password against the database and sets the session
     GET: It returns the login page
+    ---
+    parameters:
+        - name: email
+          in: body
+          type: string
+          required: true 
+        - name: password
+          in: body
+          type: string
+          required: true
+    responses:
+        200:
+            description: Successful login
+        401:
+            description: Unsuccessful login
     """
     if request.method == 'POST':
         return login(request.form['email'], request.form['password'])
@@ -58,6 +67,22 @@ def logout_page():
     """
     User logout route.
     It clears the session and redirects to the login page.
+    ---
+    parameters:
+    - name: email
+          in: body
+          type: string
+          required: true 
+        - name: password
+          in: body
+          type: string
+          required: true
+    responses:
+        200:
+            description: Successful login
+        401:
+            description: Unauthorized login
+
     """
     # Will change this to a redirect instead of just a json response
     return logout()
@@ -136,9 +161,9 @@ def pet_detail_route(pet_id):
     return jsonify({"error": "Method not allowed"}), 405
 
 @app.route('/api/pets/create', methods=['GET'])
-@login_required(Role.STAFF)  # Requires at least STAFF role
-def create_pet_route():
-    """Test endpoint for creating a pet - used in tests"""
+@login_required(2)  # Requires at least STAFF role
+def create_pet():
+    """To be implemented, just wanted to check my decorator doesn't throw an error"""
     return jsonify({"message": "Pet created successfully!"}), 201
 
 # Application routes
