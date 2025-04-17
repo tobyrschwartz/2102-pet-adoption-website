@@ -1,108 +1,75 @@
 """The module for managing pet-related operations."""
 from flask import jsonify
-from enums import ApplicationStatus, PetStatus#, Role i'll implement role stuff later
+from enums import PetStatus
+from mock_data import get_mock_pet, get_mock_pet_list
 
-def create_pet(name: str, species: str, breed: str, age: int, size, status: PetStatus):
-    # **this is a mock function**
+def create_pet(pet_data):
     """
     Create a new pet with the given details.
     
-    :param name: Name of the pet
-    :param species: Species of the pet (e.g., Dog, Cat)
-    :param breed: Breed of the pet
-    :param age: Age of the pet in years
-    :param size: Size of the pet (e.g., Small, Medium, Large)
-    :param status: Adoption status of the pet (e.g., Available, Adopted)
+    :param pet_data: Dictionary containing pet details with the following keys:
+                    - name: Name of the pet
+                    - species: Species of the pet (e.g., Dog, Cat)
+                    - breed: Breed of the pet
+                    - age: Age of the pet in years
+                    - description: Description including size and other details
+                    - status: (optional) Adoption status of the pet
     :return: JSON response with the created pet details
     """
-
+    # This is a mock function
     new_pet = {
-        "name": name,
-        "species": species,
-        "breed": breed,
-        "age": age,
-        "size": size,
-        "status": status
+        "name": pet_data.get("name"),
+        "species": pet_data.get("species"),
+        "breed": pet_data.get("breed"),
+        "age": pet_data.get("age"),
+        "description": pet_data.get("description"),
+        "status": pet_data.get("status", PetStatus.AVAILABLE)
     }
     return jsonify(new_pet), 201
 
-def get_applications(): # **this is a mock function**
+def get_pet(pet_id):
     """
-    Retrieve all applications.
+    Retrieve a specific pet by its ID.
     
-    :return: JSON response with a list of applications
+    :param pet_id: ID of the pet to retrieve
+    :return: JSON response with the pet details
     """
-    applications = [
-        {
-        "application_id": 1,
-        "user_id": "user",
-        "pet_id": 1,
-        "submit_date": "2025-04-07",
-        "status": "Pending",
-        "reviewer_id": "",
-        "review_date": ""
-        },
-        {
-        "application_id": 2,
-        "user_id": "adopter",
-        "pet_id": 2,
-        "submit_date": "2025-04-01",
-        "status": "Approved",
-        "reviewer_id": "admin",
-        "review_date": "2025-04-07"
-        }
-    ]
-    return jsonify(applications), 200
+    # This is a mock function
+    pet = get_mock_pet(pet_id)
+    return jsonify(pet), 200
 
-def get_application(application_id): # **this is a mock function**
+def get_all_pets():
     """
-    Retrieve a specific application by its ID.
+    Retrieve all pets.
+    
+    :return: JSON response with a list of pets
+    """
+    # This is a mock function
+    pets = get_mock_pet_list()
+    return jsonify(pets), 200
 
-    :param application_id: ID of the application to retrieve
-    :return: JSON response with the application details
+def get_pets_by_status(status):
     """
-    application = {
-        "application_id": application_id,
-        "user_id": "user",
-        "pet_id": 1,
-        "submit_date": "2025-04-01",
-        "status": "Approved",
-        "reviewer_id": "admin",
-        "review_date": "2025-04-07"
-    }
-    return jsonify(application), 200
+    Retrieve pets by their status.
+    
+    :param status: Status of the pets to retrieve
+    :return: JSON response with a list of pets matching the status
+    """
+    # This is a mock function
+    pets = [get_mock_pet(1, status)]
+    return jsonify(pets), 200
 
-def update_application(application_id, status: ApplicationStatus): # **this is a mock function**
+def update_pet_status(pet_id, status):
     """
-    Update the status of an application.
-
-    :param application_id: ID of the application to update
-    :param status: New status for the application
-    :return: JSON response with the updated application details
+    Update the status of a pet.
+    
+    :param pet_id: ID of the pet to update
+    :param status: New status for the pet
+    :return: JSON response with the updated pet details
     """
-    updated_application = {
-        "application_id": application_id,
+    # This is a mock function
+    updated_pet = {
+        "pet_id": pet_id,
         "status": status
     }
-    # logic for the notification system would go here
-    return jsonify(updated_application), 200
-
-def get_application_by_status(status: ApplicationStatus): # **this is a mock function**
-    """
-    Retrieve applications by their status.
-
-    :param status: Status of the applications to retrieve
-    :return: JSON response with a list of applications matching the status
-    """
-    applications = [
-        {
-        "application_id": 1,
-        "user_id": "user",
-        "pet_id": 1,
-        "submit_date": "2025-04-07",
-        "status": status,
-        "reviewer_id": "",
-        "review_date": ""
-        }
-    ]
-    return jsonify(applications), 200
+    return jsonify(updated_pet), 200
