@@ -90,12 +90,13 @@ def get_user_by_email(email: str):
     """
     conn = get_db_connection()
     cursor = conn.cursor()
-    cursor.execute('SELECT * FROM Users WHERE email = ?', (email,))
+    cursor.execute('SELECT * FROM USERS WHERE email = ?', (email,))
     user = cursor.fetchone()
     conn.close()
     if user is None:
         return jsonify({"error": "User not found"}), 404
     user = dict(user)
+    user['role'] = Role(user['role'])
     return jsonify(user), 200
 
 def get_all_users():

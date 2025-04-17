@@ -130,25 +130,40 @@ def register_page():
     GET: It returns the registration page
     """
     if request.method == 'POST':
-        data = request.json
-        if not data:
-            return jsonify({"error": "Invalid data"}), 400
-        hashed_password = bcrypt.hashpw(data['password'].encode('utf-8'), bcrypt.gensalt())
-        return create_user(
-            data.get('email'),
-            hashed_password,
-            data.get('full_name'),
-            data.get('phone'),
-            data.get('role', Role.USER)
-        )
-    # **placeholder for the registration page**
+        if request.content_type == 'application/json':
+            data = request.json
+            if not data:
+                return jsonify({"error": "Invalid data"}), 400
+            hashed_password = bcrypt.hashpw(data['password'].encode('utf-8'), bcrypt.gensalt())
+            return create_user(
+                data.get('email'),
+                hashed_password,
+                data.get('full_name'),
+                data.get('phone'),
+                data.get('role', Role.USER)
+            )
+        elif request.content_type == 'application/x-www-form-urlencoded': #we need to unimplement this later, but for now it works
+            email = request.form.get('email')
+            password = request.form.get('password')
+            full_name = request.form.get('full_name')
+            phone = request.form.get('phone')
+            role = request.form.get('role', Role.USER)
+            if not email or not password:
+                return jsonify({"error": "Email and password are required"}), 400
+            hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
+            return create_user(email, hashed_password, full_name, phone, role)
+        else:
+            return jsonify({"error": "Unsupported Content-Type"}), 400
     return '''
         <form method="POST">
             Email: <input type="text" name="email"><br>
             Password: <input type="password" name="password"><br>
+            Full Name: <input type="text" name="full_name"><br>
+            Phone: <input type="text" name="phone"><br>
             <input type="submit" value="Register">
         </form>
         '''
+
 
 @app.route('/api/users', methods=['GET', 'POST'])
 @login_required(Role.ADMIN)  # Only admins can list or create users
