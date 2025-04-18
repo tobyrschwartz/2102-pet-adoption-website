@@ -142,7 +142,7 @@ def register_page():
                 data.get('phone'),
                 data.get('role', Role.USER)
             )
-        elif request.content_type == 'application/x-www-form-urlencoded':
+        if request.content_type == 'application/x-www-form-urlencoded':
             #we need to unimplement this later, but for now it works
             email = request.form.get('email')
             password = request.form.get('password')
