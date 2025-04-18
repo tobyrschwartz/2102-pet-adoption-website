@@ -111,7 +111,8 @@ def register_page():
                 data.get('phone'),
                 data.get('role', Role.USER)
             )
-        elif request.content_type == 'application/x-www-form-urlencoded': #we need to unimplement this later, but for now it works
+        elif request.content_type == 'application/x-www-form-urlencoded':
+            #we need to unimplement this later, but for now it works
             email = request.form.get('email')
             password = request.form.get('password')
             full_name = request.form.get('full_name')
@@ -121,8 +122,7 @@ def register_page():
                 return jsonify({"error": "Email and password are required"}), 400
             hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
             return create_user(email, hashed_password, full_name, phone, role)
-        else:
-            return jsonify({"error": "Unsupported Content-Type"}), 400
+        return jsonify({"error": "Unsupported Content-Type"}), 400
     return '''
         <form method="POST">
             Email: <input type="text" name="email"><br>
@@ -178,7 +178,7 @@ def pets_route():
     if request.method == 'POST':
         @login_required(Role.STAFF)
         def create_pet_wrapper():
-            return create_pet_handler()
+            return create_pet_handler(request.json)
         return create_pet_wrapper()
     # Check if search parameters are provided
     if request.args:
