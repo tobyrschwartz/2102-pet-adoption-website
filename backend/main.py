@@ -69,6 +69,21 @@ def login_page():
     User login route.
     POST: It checks the provided email and password against the database and sets the session
     GET: It returns the login page
+    ---
+    parameters:
+        - name: email
+          in: body
+          type: string
+          required: true 
+        - name: password
+          in: body
+          type: string
+          required: true
+    responses:
+        200:
+            description: Successful login
+        401:
+            description: Unsuccessful login
     """
     if request.method == 'POST':
         check_hash = request.form['password'].encode('utf-8')
@@ -87,6 +102,22 @@ def logout_page():
     """
     User logout route.
     It clears the session and redirects to the login page.
+    ---
+    parameters:
+    - name: email
+          in: body
+          type: string
+          required: true 
+        - name: password
+          in: body
+          type: string
+          required: true
+    responses:
+        200:
+            description: Successful login
+        401:
+            description: Unauthorized login
+
     """
     # Will change this to a redirect instead of just a json response
     return logout()
@@ -208,9 +239,9 @@ def pet_detail_route(pet_id):
     return jsonify({"error": "Method not allowed"}), 405
 
 @app.route('/api/pets/create', methods=['GET'])
-@login_required(Role.STAFF)  # Requires at least STAFF role
-def create_pet_route():
-    """Test endpoint for creating a pet - used in tests"""
+@login_required(2)  # Requires at least STAFF role
+def create_pet():
+    """To be implemented, just wanted to check my decorator doesn't throw an error"""
     return jsonify({"message": "Pet created successfully!"}), 201
 
 # Application routes
