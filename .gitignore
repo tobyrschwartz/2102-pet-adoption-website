@@ -70,3 +70,9 @@ dmypy.json
 
 # profiling data
 .prof
+
+# SQLite database files
+*.sqlite3
+*.db
+*.db-journal
+*.sqlite
