@@ -70,3 +70,5 @@ dmypy.json
 
 # profiling data
 .prof
+
+node_modules/
