@@ -78,3 +78,5 @@ node_modules/
 *.db
 *.db-journal
 *.sqlite
+
+node_modules/
