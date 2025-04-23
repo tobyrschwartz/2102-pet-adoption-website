@@ -24,7 +24,7 @@ jobs:
           pip install pylint
       - name: Analysing the code with pylint
         run: |
-          pylint --disable=C0114,C0116,C0325,C0305 $(git ls-files 'backend/*.py')
+          pylint --disable=C0114,C0116,C0325,C0305,R0801 $(git ls-files 'backend/*.py')
   build-and-test:
     runs-on: self-hosted
     

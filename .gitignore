@@ -72,4 +72,11 @@ dmypy.json
 .prof
 
 node_modules/
-.vscode/
+
+# SQLite database files
+*.sqlite3
+*.db
+*.db-journal
+*.sqlite
+
+node_modules/
