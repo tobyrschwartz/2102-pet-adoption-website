@@ -71,12 +71,8 @@ dmypy.json
 # profiling data
 .prof
 
-node_modules/
-
 # SQLite database files
-*.sqlite3
-*.db
-*.db-journal
 *.sqlite
-
+# node files
 node_modules/
+
