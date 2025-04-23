@@ -1,0 +1,22 @@
+.navbar {
+    background-color: #579dff;
+    padding: 10px;
+    display: flex;
+    gap: 15px;
+    justify-content: flex-start;
+  }
+  
+  .navbar a {
+    color: white;
+    text-decoration: none;
+    padding: 5px 10px;
+    border-radius: 5px;
+  }
+  
+  .navbar a.active {
+    background-color: #579dff;
+  }
+  
+  .navbar a.inactive:hover {
+    background-color: #579dff;
+  }
