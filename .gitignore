@@ -73,6 +73,7 @@ dmypy.json
 
 # SQLite database files
 *.sqlite
+*.db
 # node files
 node_modules/
 

@@ -1,6 +1,7 @@
 """Main module of the application"""
 from sys import argv
 import bcrypt
+from flask_cors import CORS
 from flask import Flask, request, session, jsonify
 from flasgger import Swagger
 from user import (login, get_user_role, logout, create_user,
@@ -32,6 +33,7 @@ def login_required(min_permission):
 
 
 app = Flask(__name__)
+CORS(app)
 app.secret_key = "OFNDEWOWKDO<FO@" # random ahh key for now **change before production**
 app.config.update( # credits to https://flask.palletsprojects.com/en/2.3.x/quickstart/#sessions
     SESSION_COOKIE_HTTPONLY=True,
@@ -86,8 +88,11 @@ def login_page():
             description: Unsuccessful login
     """
     if request.method == 'POST':
-        check_hash = request.form['password'].encode('utf-8')
-        return login(request.form['email'], check_hash)
+        data = request.json
+        if not data:
+            return jsonify({"error": "Invalid data"}), 400
+        check_hash = data['password'].encode('utf-8')
+        return login(data['email'], check_hash)
     # **placeholder for the login page**
     return '''
         <form method="POST">
