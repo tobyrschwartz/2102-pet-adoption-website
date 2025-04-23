@@ -1,4 +1,27 @@
+import React, {useState, useEffect} from 'react';
+import { useNavigate } from 'react-router-dom';
+
 const Login = () => {
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const navigate = useNavigate();
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const response = await fetch('/api/login', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ username, password }),
+    });
+    if (response.ok) {
+      navigate('/home');
+    } else {
+      const error = await response.json();
+      alert(`Login failed: ${error.message}`);
+    }
+  };
+      
   return (
     <div
       style={{
@@ -39,6 +62,7 @@ const Login = () => {
           Login to Adopt
         </h2>
         <form
+        onSubmit={handleSubmit}
           style={{
         display: 'flex',
         flexDirection: 'column',
