@@ -33,12 +33,13 @@ def login_required(min_permission):
 
 
 app = Flask(__name__)
-CORS(app, supports_credentials=True, origins=["http://localhost:5173"])
 app.secret_key = "OFNDEWOWKDO<FO@" # random ahh key for now **change before production**
+
 app.config.update( # credits to https://flask.palletsprojects.com/en/2.3.x/quickstart/#sessions
     SESSION_COOKIE_HTTPONLY=True,
     SESSION_COOKIE_SECURE=False,
-    SESSION_COOKIE_SAMESITE='None',
+    SESSION_COOKIE_SAMESITE='Lax',
+    PERMANENT_SESSION_LIFETIME=3600,
     SWAGGER={
         'title': 'Pet Adoption API',
         'uiversion': 3, # Use Swagger UI 3
@@ -46,6 +47,7 @@ app.config.update( # credits to https://flask.palletsprojects.com/en/2.3.x/quick
         'description': 'API for managing users, pets, and adoption applications.'
     }
 )
+CORS(app, supports_credentials=True, origins=["http://localhost:5173"])
 
 swagger_config = {
     "headers": [],
@@ -283,7 +285,6 @@ def index():
     return "<h1>Welcome to the Pet Adoption API!</h1>"
 
 @app.route('/api/items', methods=['GET'])
-@login_required(Role.USER)  # Any logged-in user can access this route
 def get_items():
     """
     A simple endpoint to return a list of dummy items.

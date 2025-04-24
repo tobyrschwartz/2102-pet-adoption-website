@@ -197,6 +197,7 @@ def login(email: str, guessed_password: bytearray):
             "user_id": user.get("user_id"),
             "role": user.get("role"),
         }
+        session.permanent = True
         session['user_id'] = user.get("user_id")
         return jsonify(response), 200
     return jsonify({"error": "Invalid email or password"}), 401
