@@ -19,7 +19,7 @@ function ItemList() {
         setLoading(true); 
         setError(null); 
 
-        const response = await fetch('http://localhost:5005/api/items', {credentials: 'include'});
+        const response = await fetch('http://localhost:5000/check-session', {credentials: 'include'});
 
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
