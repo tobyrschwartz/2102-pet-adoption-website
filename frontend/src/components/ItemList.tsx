@@ -19,7 +19,14 @@ function ItemList() {
         setLoading(true); 
         setError(null); 
 
-        const response = await fetch('http://localhost:5000/check-session', {credentials: 'include'});
+        const response = await fetch('http://localhost:5000/api/items', {
+          credentials: 'include', // Ensures cookies are sent with the request
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          },
+          method: 'GET',
+        });
 
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);

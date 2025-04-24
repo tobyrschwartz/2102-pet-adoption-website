@@ -35,10 +35,10 @@ def login_required(min_permission):
 app = Flask(__name__)
 app.secret_key = "OFNDEWOWKDO<FO@" # random ahh key for now **change before production**
 
-app.config.update( # credits to https://flask.palletsprojects.com/en/2.3.x/quickstart/#sessions
+app.config.update(
     SESSION_COOKIE_HTTPONLY=True,
-    SESSION_COOKIE_SECURE=False,
-    SESSION_COOKIE_SAMESITE='Lax',
+    SESSION_COOKIE_SECURE=False,  # False for HTTP in development
+    SESSION_COOKIE_SAMESITE='Lax',  # Allow cross-origin
     PERMANENT_SESSION_LIFETIME=3600,
     SWAGGER={
         'title': 'Pet Adoption API',
@@ -47,7 +47,13 @@ app.config.update( # credits to https://flask.palletsprojects.com/en/2.3.x/quick
         'description': 'API for managing users, pets, and adoption applications.'
     }
 )
-CORS(app, supports_credentials=True, origins=["http://localhost:5173"])
+
+CORS(app, 
+     supports_credentials=True,
+     origins=["http://localhost:5173"],
+     allow_headers=["Content-Type", "Accept"],
+     expose_headers=["Set-Cookie"],
+     methods=["GET", "POST", "OPTIONS"])
 
 swagger_config = {
     "headers": [],
@@ -285,6 +291,7 @@ def index():
     return "<h1>Welcome to the Pet Adoption API!</h1>"
 
 @app.route('/api/items', methods=['GET'])
+@login_required(Role.USER)  # Any logged-in user can access this route
 def get_items():
     """
     A simple endpoint to return a list of dummy items.
@@ -298,6 +305,7 @@ def get_items():
     return jsonify(dummy_items)
 
 @app.route("/check-session")
+
 def check_session():
     """"Check the current session and return its contents."""
     return jsonify({
