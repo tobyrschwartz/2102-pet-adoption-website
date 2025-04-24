@@ -91,8 +91,8 @@ def login_page():
         data = request.json
         if not data:
             return jsonify({"error": "Invalid data"}), 400
-        check_hash = data['password'].encode('utf-8')
-        return login(data['email'], check_hash)
+        guessed_pw = data['password'].encode('utf-8')
+        return login(data['email'], guessed_pw)
     return jsonify({"error": "Unsupported Content-Type"}), 400
 
 @app.route('/logout', methods=['GET'])
