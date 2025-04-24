@@ -77,3 +77,6 @@ dmypy.json
 # node files
 node_modules/
 
+#silly files
+.vscode/
+./vite

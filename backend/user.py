@@ -1,6 +1,7 @@
 """The module for managing user-related operations."""
 import sqlite3
 from flask import jsonify, session
+from bcrypt import hashpw
 from enums import Role
 
 def get_db_connection():
@@ -79,6 +80,8 @@ def get_user_by_id(user_id: int):
     if user is None:
         return jsonify({"error": "User not found"}), 404
     user = dict(user)
+    if 'password_hash' in user:
+        del user['password_hash']
     return jsonify(user), 200
 
 def get_user_by_email(email: str):
@@ -97,6 +100,8 @@ def get_user_by_email(email: str):
         return jsonify({"error": "User not found"}), 404
     user = dict(user)
     user['role'] = Role(user['role'])
+    if 'password_hash' in user:
+        del user['password_hash']
     return jsonify(user), 200
 
 def get_all_users():
@@ -156,7 +161,21 @@ def get_user_role(user_id: str):
         return Role.USER
     return Role.GUEST
 
-def login(email: str, hashed_password: str):
+def get_pw_hash_from_email(email: str):
+    """
+    Retrieve the password hash of a user by their email.
+    
+    :param email: Email of the user
+    :return: Password hash of the user
+    """
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute('SELECT password_hash FROM Users WHERE email = ?', (email,))
+    pw_hash = cursor.fetchone()
+    conn.close()
+    return pw_hash[0] if pw_hash else None
+
+def login(email: str, guessed_password: bytearray):
     """
     Log in a user with the given email and password.
     
@@ -167,8 +186,12 @@ def login(email: str, hashed_password: str):
     response, status = get_user_by_email(email)
     if status != 200:
         return jsonify({"error": "Invalid email or password"}), 401
-    user = response.json
-    if hashed_password == user.get("password_hash"):
+    user = response.get_json()
+    hashed_password = get_pw_hash_from_email(email)
+    if hashed_password is None:
+        return jsonify({"error": "Invalid email or password"}), 401
+    guessed_hash = hashpw(guessed_password, hashed_password)
+    if guessed_hash == hashed_password:
         response = {
             "message": "Login successful",
             "user_id": user.get("user_id"),
