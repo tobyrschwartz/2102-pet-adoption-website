@@ -33,7 +33,8 @@ def login_required(min_permission):
 
 
 app = Flask(__name__)
-CORS(app, resources={r"/api/*": {"origins": "http://localhost:5173"}}) 
+CORS(app)
+#CORS(app, resources={r"/api/*": {"origins": "http://localhost:5173"}})
 app.secret_key = "OFNDEWOWKDO<FO@" # random ahh key for now **change before production**
 app.config.update( # credits to https://flask.palletsprojects.com/en/2.3.x/quickstart/#sessions
     SESSION_COOKIE_HTTPONLY=True,
@@ -335,4 +336,4 @@ if __name__ == '__main__':
         print("Database being (re)created.")
     else:
         init_db()
-    app.run(host='0.0.0.0', debug=True) 
+    app.run(host='0.0.0.0', debug=True)
