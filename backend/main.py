@@ -33,8 +33,7 @@ def login_required(min_permission):
 
 
 app = Flask(__name__)
-CORS(app)
-#CORS(app, resources={r"/api/*": {"origins": "http://localhost:5173"}})
+CORS(app, supports_credentials=True, origins=["http://localhost:5173"])
 app.secret_key = "OFNDEWOWKDO<FO@" # random ahh key for now **change before production**
 app.config.update( # credits to https://flask.palletsprojects.com/en/2.3.x/quickstart/#sessions
     SESSION_COOKIE_HTTPONLY=True,
@@ -66,7 +65,7 @@ swagger_config = {
 swagger = Swagger(app, config=swagger_config)
 
 # User routes
-@app.route('/login', methods=['GET','POST'])
+@app.route('/login', methods=['POST'])
 def login_page():
     """
     User login route.
@@ -94,14 +93,7 @@ def login_page():
             return jsonify({"error": "Invalid data"}), 400
         check_hash = data['password'].encode('utf-8')
         return login(data['email'], check_hash)
-    # **placeholder for the login page**
-    return '''
-        <form method="POST">
-            Email: <input type="text" name="email"><br>
-            Password: <input type="password" name="password"><br>
-            <input type="submit" value="Login">
-        </form>
-        '''
+    return jsonify({"error": "Unsupported Content-Type"}), 400
 
 @app.route('/logout', methods=['GET'])
 def logout_page():
@@ -128,7 +120,7 @@ def logout_page():
     # Will change this to a redirect instead of just a json response
     return logout()
 
-@app.route('/register', methods=['GET','POST'])
+@app.route('/register', methods=['POST'])
 def register_page():
     """
     User registration route.
@@ -148,28 +140,8 @@ def register_page():
                 data.get('phone'),
                 data.get('role', Role.USER)
             )
-        if request.content_type == 'application/x-www-form-urlencoded':
-            #we need to unimplement this later, but for now it works
-            email = request.form.get('email')
-            password = request.form.get('password')
-            full_name = request.form.get('full_name')
-            phone = request.form.get('phone')
-            role = request.form.get('role', Role.USER)
-            if not email or not password:
-                return jsonify({"error": "Email and password are required"}), 400
-            hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
-            return create_user(email, hashed_password, full_name, phone, role)
         return jsonify({"error": "Unsupported Content-Type"}), 400
-    return '''
-        <form method="POST">
-            Email: <input type="text" name="email"><br>
-            Password: <input type="password" name="password"><br>
-            Full Name: <input type="text" name="full_name"><br>
-            Phone: <input type="text" name="phone"><br>
-            <input type="submit" value="Register">
-        </form>
-        '''
-
+    return jsonify({"error": "Unsupported Content-Type"}), 400
 
 @app.route('/api/users', methods=['GET', 'POST'])
 @login_required(Role.ADMIN)  # Only admins can list or create users
