@@ -33,7 +33,7 @@ def login_required(min_permission):
 
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, resources={r"/api/*": {"origins": "http://localhost:5173"}}) 
 app.secret_key = "OFNDEWOWKDO<FO@" # random ahh key for now **change before production**
 app.config.update( # credits to https://flask.palletsprojects.com/en/2.3.x/quickstart/#sessions
     SESSION_COOKIE_HTTPONLY=True,
@@ -309,6 +309,19 @@ def index():
     """
     return "<h1>Welcome to the Pet Adoption API!</h1>"
 
+@app.route('/api/items', methods=['GET'])
+def get_items():
+    """
+    A simple endpoint to return a list of dummy items.
+    This simulates fetching data that the frontend will display.
+    """
+    dummy_items = [
+        {"id": 1, "name": "Item One", "description": "This is the first item."},
+        {"id": 2, "name": "Item Two", "description": "Description for item two."},
+        {"id": 3, "name": "Item Three", "description": "And the third one."},
+    ]
+    return jsonify(dummy_items)
+
 # For testing purposes
 @app.route('/protected', methods=['GET'])
 @login_required(2)  # Requires at least STAFF role
@@ -322,4 +335,4 @@ if __name__ == '__main__':
         print("Database being (re)created.")
     else:
         init_db()
-    app.run(debug=True)
+    app.run(host='0.0.0.0', debug=True) 

@@ -1,5 +1,6 @@
-//import React from "react";
 import { Link } from "react-router-dom";
+import ItemList from './ItemList';
+
 const Home = () => {
     return (
         <div style={{ textAlign: "center", padding: "20px" }}>
@@ -17,7 +18,16 @@ const Home = () => {
                     Login
                 </button>
             </Link>
+
+            <hr style={{marginTop: '30px', marginBottom: '20px'}} />
+            <div style={{ textAlign: 'center' }}> 
+                <h2>Data from Backend (Steel Thread Example):</h2>
+                <ItemList />
+            </div>
+
         </div>
+        
+        
     );
 };
 
