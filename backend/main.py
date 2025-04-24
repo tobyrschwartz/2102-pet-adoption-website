@@ -48,7 +48,7 @@ app.config.update(
     }
 )
 
-CORS(app, 
+CORS(app,
      supports_credentials=True,
      origins=["http://localhost:5173"],
      allow_headers=["Content-Type", "Accept"],
