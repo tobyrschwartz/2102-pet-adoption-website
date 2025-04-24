@@ -5,6 +5,8 @@ from unittest.mock import patch
 import pytest
 from main import app
 from enums import Role
+from unittest.mock import patch
+from flask import jsonify
 
 @pytest.fixture
 def client():
@@ -71,19 +73,46 @@ def test_home_page(client):
     assert response.status_code == 200
     assert b"Welcome to the Pet Adoption API!" in response.data
 
-def test_login_get(client):
-    """Tests that HTML form is properly returned"""
-    response = client.get('/login')
-    assert response.status_code == 200
-    assert b"<form method=\"POST\">" in response.data
 
-@patch('main.login')
-def test_login(mock_login, client):
-    """Test login with valid credentials"""
-    mock_login.return_value = ({"message": "Login successful"}, 200)
-    response = client.post('/login', data={'email': 'test@example.com', 'password': 'secret'})
+@patch('main.get_user_by_email')
+@patch('main.get_pw_hash_from_email')
+@patch('main.hashpw')
+def test_login_success(mock_hashpw, mock_get_pw_hash, mock_get_user, client):
+    """Test login with valid credentials using inline JSON"""
+
+    # Inline login credentials
+    email = "test@example.com"
+    password = "secret"
+    password_bytes = password.encode()
+
+    # Mock user data returned from get_user_by_email
+    user_data = {
+        "user_id": 1,
+        "role": "adopter",
+        "email": email
+    }
+    mock_get_user.return_value = jsonify(user_data), 200
+
+    # Mock password hash functions
+    fake_hash = b"hashed_secret"
+    mock_get_pw_hash.return_value = fake_hash
+    mock_hashpw.return_value = fake_hash  # Simulates correct password match
+
+    # Make POST request with JSON body
+    response = client.post('/login', json={
+        "email": email,
+        "password": password
+    })
+
     assert response.status_code == 200
-    mock_login.assert_called_once_with('test@example.com', b'secret')
+    data = response.get_json()
+    assert data["message"] == "Login successful"
+    assert data["user_id"] == 1
+    assert data["role"] == "adopter"
+
+    mock_get_user.assert_called_once_with(email)
+    mock_get_pw_hash.assert_called_once_with(email)
+    mock_hashpw.assert_called_once_with(password_bytes, fake_hash)
 
 @patch('main.logout')
 def test_logout(mock_logout, client):
