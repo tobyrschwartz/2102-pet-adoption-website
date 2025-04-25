@@ -71,17 +71,12 @@ def test_home_page(client):
     assert response.status_code == 200
     assert b"Welcome to the Pet Adoption API!" in response.data
 
-def test_login_get(client):
-    """Tests that HTML form is properly returned"""
-    response = client.get('/login')
-    assert response.status_code == 200
-    assert b"<form method=\"POST\">" in response.data
 
 @patch('main.login')
 def test_login(mock_login, client):
     """Test login with valid credentials"""
     mock_login.return_value = ({"message": "Login successful"}, 200)
-    response = client.post('/login', data={'email': 'test@example.com', 'password': 'secret'})
+    response = client.post('/login', json={'email': 'test@example.com', 'password': 'secret'})
     assert response.status_code == 200
     mock_login.assert_called_once_with('test@example.com', b'secret')
 

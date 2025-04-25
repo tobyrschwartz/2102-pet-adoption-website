@@ -1,6 +1,7 @@
 """Main module of the application"""
 from sys import argv
 import bcrypt
+from flask_cors import CORS
 from flask import Flask, request, session, jsonify
 from flasgger import Swagger
 from user import (login, get_user_role, logout, create_user,
@@ -33,10 +34,12 @@ def login_required(min_permission):
 
 app = Flask(__name__)
 app.secret_key = "OFNDEWOWKDO<FO@" # random ahh key for now **change before production**
-app.config.update( # credits to https://flask.palletsprojects.com/en/2.3.x/quickstart/#sessions
+
+app.config.update(
     SESSION_COOKIE_HTTPONLY=True,
-    SESSION_COOKIE_SECURE=True,
-    SESSION_COOKIE_SAMESITE='Lax',
+    SESSION_COOKIE_SECURE=False,  # False for HTTP in development
+    SESSION_COOKIE_SAMESITE='Lax',  # Allow cross-origin
+    PERMANENT_SESSION_LIFETIME=3600,
     SWAGGER={
         'title': 'Pet Adoption API',
         'uiversion': 3, # Use Swagger UI 3
@@ -44,6 +47,13 @@ app.config.update( # credits to https://flask.palletsprojects.com/en/2.3.x/quick
         'description': 'API for managing users, pets, and adoption applications.'
     }
 )
+
+CORS(app,
+     supports_credentials=True,
+     origins=["http://localhost:5173"],
+     allow_headers=["Content-Type", "Accept"],
+     expose_headers=["Set-Cookie"],
+     methods=["GET", "POST", "OPTIONS"])
 
 swagger_config = {
     "headers": [],
@@ -63,7 +73,7 @@ swagger_config = {
 swagger = Swagger(app, config=swagger_config)
 
 # User routes
-@app.route('/login', methods=['GET','POST'])
+@app.route('/login', methods=['POST'])
 def login_page():
     """
     User login route.
@@ -86,16 +96,12 @@ def login_page():
             description: Unsuccessful login
     """
     if request.method == 'POST':
-        check_hash = request.form['password'].encode('utf-8')
-        return login(request.form['email'], check_hash)
-    # **placeholder for the login page**
-    return '''
-        <form method="POST">
-            Email: <input type="text" name="email"><br>
-            Password: <input type="password" name="password"><br>
-            <input type="submit" value="Login">
-        </form>
-        '''
+        data = request.json
+        if not data:
+            return jsonify({"error": "Invalid data"}), 400
+        guessed_pw = data['password'].encode('utf-8')
+        return login(data['email'], guessed_pw)
+    return jsonify({"error": "Unsupported Content-Type"}), 400
 
 @app.route('/logout', methods=['GET'])
 def logout_page():
@@ -122,7 +128,7 @@ def logout_page():
     # Will change this to a redirect instead of just a json response
     return logout()
 
-@app.route('/register', methods=['GET','POST'])
+@app.route('/register', methods=['POST'])
 def register_page():
     """
     User registration route.
@@ -142,28 +148,8 @@ def register_page():
                 data.get('phone'),
                 data.get('role', Role.USER)
             )
-        if request.content_type == 'application/x-www-form-urlencoded':
-            #we need to unimplement this later, but for now it works
-            email = request.form.get('email')
-            password = request.form.get('password')
-            full_name = request.form.get('full_name')
-            phone = request.form.get('phone')
-            role = request.form.get('role', Role.USER)
-            if not email or not password:
-                return jsonify({"error": "Email and password are required"}), 400
-            hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
-            return create_user(email, hashed_password, full_name, phone, role)
         return jsonify({"error": "Unsupported Content-Type"}), 400
-    return '''
-        <form method="POST">
-            Email: <input type="text" name="email"><br>
-            Password: <input type="password" name="password"><br>
-            Full Name: <input type="text" name="full_name"><br>
-            Phone: <input type="text" name="phone"><br>
-            <input type="submit" value="Register">
-        </form>
-        '''
-
+    return jsonify({"error": "Unsupported Content-Type"}), 400
 
 @app.route('/api/users', methods=['GET', 'POST'])
 @login_required(Role.ADMIN)  # Only admins can list or create users
@@ -304,6 +290,29 @@ def index():
     """
     return "<h1>Welcome to the Pet Adoption API!</h1>"
 
+@app.route('/api/items', methods=['GET'])
+@login_required(Role.USER)  # Any logged-in user can access this route
+def get_items():
+    """
+    A simple endpoint to return a list of dummy items.
+    This simulates fetching data that the frontend will display.
+    """
+    dummy_items = [
+        {"id": 1, "name": "Item One", "description": "This is the first item."},
+        {"id": 2, "name": "Item Two", "description": "Description for item two."},
+        {"id": 3, "name": "Item Three", "description": "And the third one."},
+    ]
+    return jsonify(dummy_items)
+
+@app.route("/check-session")
+
+def check_session():
+    """"Check the current session and return its contents."""
+    return jsonify({
+        "user_id": session.get("user_id"),
+        "session_contents": dict(session),
+    })
+
 # For testing purposes
 @app.route('/protected', methods=['GET'])
 @login_required(2)  # Requires at least STAFF role
@@ -317,4 +326,4 @@ if __name__ == '__main__':
         print("Database being (re)created.")
     else:
         init_db()
-    app.run(debug=True)
+    app.run(host='0.0.0.0', debug=True)

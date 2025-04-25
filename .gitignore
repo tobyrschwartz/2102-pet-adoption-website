@@ -72,7 +72,11 @@ dmypy.json
 .prof
 
 # SQLite database files
-*.sqlite3
-*.db
-*.db-journal
 *.sqlite
+*.db
+# node files
+node_modules/
+
+#silly files
+.vscode/
+./vite
