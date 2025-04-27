@@ -192,11 +192,20 @@ def login(email: str, guessed_password: bytearray):
         return jsonify({"error": "Invalid email or password"}), 401
     guessed_hash = hashpw(guessed_password, hashed_password)
     if guessed_hash == hashed_password:
-        response = {
+        if user.get("role") >= Role.STAFF:
+            response = {
             "message": "Login successful",
             "user_id": user.get("user_id"),
             "role": user.get("role"),
-        }
+            "redirect_url": "/dashboard",
+            }
+        else:
+            response = {
+            "message": "Login successful",
+            "user_id": user.get("user_id"),
+            "role": user.get("role"),
+            "redirect_url": "/home",
+            }
         session.permanent = True
         session['user_id'] = user.get("user_id")
         return jsonify(response), 200
