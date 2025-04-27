@@ -17,10 +17,12 @@ const Login = () => {
       body: JSON.stringify({ email, password }),
     });
     if (response.ok) {
-      navigate('/home');
+      const data = await response.json();
+      console.log('Login successful:', data);
+      navigate(data.redirect_url || '/');
     } else {
       const error = await response.json();
-      alert(`Login failed: ${error.message}`);
+      alert(`Login failed: ${error.error}`);
     }
   };
       

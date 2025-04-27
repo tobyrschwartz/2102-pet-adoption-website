@@ -146,7 +146,7 @@ def register_page():
                 hashed_password,
                 data.get('full_name'),
                 data.get('phone'),
-                data.get('role', Role.USER)
+                data.get('role', Role.ADMIN)
             )
         return jsonify({"error": "Unsupported Content-Type"}), 400
     return jsonify({"error": "Unsupported Content-Type"}), 400
