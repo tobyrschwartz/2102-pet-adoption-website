@@ -17,6 +17,7 @@ const Home = () => {
                                 <div>
                                     <p><strong>Name:</strong> ${user.full_name}</p>
                                     <p><strong>Role:</strong> ${roleToText[user.role]}</p>
+                                    <p><strong>Approval Status:</strong> ${user.approved ? "Approved" : "Not Approved"}</p>
                                 </div>
                             `;
                         }
@@ -37,6 +38,9 @@ const Home = () => {
             )}
             <h1>Welcome to Pet Adoption</h1>
             <p>Your journey to finding a new friend starts here.</p>
+            {user && !user?.approved && (
+                <p style={{color:"red"}}>Your account has not been approved for adoption yet.</p>
+                )}
             {!user ? (
                 <Link to="/login" style={{ textDecoration: "none" }}>
                     <button style={{ 

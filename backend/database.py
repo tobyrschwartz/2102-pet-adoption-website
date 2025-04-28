@@ -43,6 +43,7 @@ def init_db(db_name="petadoption.db", first_run=False):
                     full_name TEXT NOT NULL,
                     phone TEXT,
                     role INTEGER NOT NULL DEFAULT 1,
+                    approved INTEGER NOT NULL DEFAULT 0,
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                 )
             ''')

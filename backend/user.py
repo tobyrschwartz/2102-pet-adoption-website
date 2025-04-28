@@ -13,17 +13,19 @@ def get_db_connection():
     conn.row_factory = sqlite3.Row  # Allows accessing columns by name
     return conn
 
-def create_user(email: str, password_hash: str, full_name: str, phone: str, role: Role):
+def create_user(user_data: dict):
     """
     Creates a new user in the database.
     Assumes password is already hashed.
 
     Args:
-        email (str): User's email (must be unique).
-        password_hash (str): The pre-hashed password.
-        full_name (str): User's full name.
-        phone (str): User's phone number (optional).
-        role (int): User's role (integer value from Role enum).
+        user_data (dict): A dictionary containing user details:
+            - email (str): User's email (must be unique).
+            - password_hash (str): The pre-hashed password.
+            - full_name (str): User's full name.
+            - phone (str): User's phone number (optional).
+            - role (int): User's role (integer value from Role enum).
+            - approved (bool): Whether the user is approved (default is False).
 
     Returns:
         tuple: (dict or None, str or None) - (user_data, error_message)
@@ -33,15 +35,21 @@ def create_user(email: str, password_hash: str, full_name: str, phone: str, role
     cursor = conn.cursor()
     cursor.execute('''
         SELECT COUNT(*) FROM Users WHERE email = ?
-    ''', (email,))
+    ''', (user_data['email'],))
     count = cursor.fetchone()[0]
     if count > 0:
         return jsonify("Email already exists"), 400
     cursor.execute('''
-
-    INSERT INTO Users (email, password_hash, full_name, phone, role)
-    VALUES (?, ?, ?, ?, ?)
-    ''', (email, password_hash, full_name, phone, role))
+        INSERT INTO Users (email, password_hash, full_name, phone, role, approved)
+        VALUES (?, ?, ?, ?, ?, ?)
+    ''', (
+        user_data['email'],
+        user_data['password_hash'],
+        user_data['full_name'],
+        user_data.get('phone', None),
+        user_data['role'],
+        user_data.get('approved', False)
+    ))
     conn.commit()
     user_id = cursor.lastrowid
     conn.close()
@@ -217,6 +225,7 @@ def login(email: str, guessed_password: bytearray):
             "user_id": user.get("user_id"),
             "full_name": user.get("full_name"),
             "role": user.get("role"),
+            "approved": user.get("approved"),
             "redirect_url": "/admin/dashboard",
             }
         else:
@@ -225,6 +234,7 @@ def login(email: str, guessed_password: bytearray):
             "user_id": user.get("user_id"),
             "full_name": user.get("full_name"),
             "role": user.get("role"),
+            "approved": user.get("approved"),
             "redirect_url": "/home",
             }
         session.permanent = True

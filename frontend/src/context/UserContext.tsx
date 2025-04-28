@@ -16,6 +16,7 @@ type User = {
     full_name: string;
     email: string;
     role: Role;
+    approved?: boolean;
 };
 const UserContext = createContext<{
     user: User | null;
@@ -37,8 +38,8 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
         .then((data) => {
             if (data.logged_in) {
                 console.log("User data:", data);
-                const { email, full_name, role} = data;
-                setUser({ full_name, email , role: role as Role});
+                const { email, full_name, role, approved} = data;
+                setUser({ full_name, email , role: role as Role, approved});
               }
         })
         .catch((err) => console.error("Failed to fetch user:", err));

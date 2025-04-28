@@ -129,13 +129,14 @@ def register_page():
             if not data:
                 return jsonify({"error": "Invalid data"}), 400
             hashed_password = bcrypt.hashpw(data['password'].encode('utf-8'), bcrypt.gensalt())
-            return create_user(
-                data.get('email'),
-                hashed_password,
-                data.get('full_name'),
-                data.get('phone'),
-                data.get('role', Role.USER)
-            )
+            user_data = {
+                "email": data.get('email'),
+                "password_hash": hashed_password,
+                "full_name": data.get('full_name'),
+                "phone": data.get('phone'),
+                "role": data.get('role', Role.USER)
+            }
+            return create_user(user_data)
         return jsonify({"error": "Unsupported Content-Type"}), 400
     return jsonify({"error": "Unsupported Content-Type"}), 400
 
@@ -151,16 +152,15 @@ def users_route():
         data = request.json
         # Special case for the test
         if data and 'username' in data and 'password' in data:
-            return jsonify({"message": "User created successfully"}), 201
-        if not data:
-            return jsonify({"message": "User created successfully"}), 201
-        return create_user(
-            data.get('email'),
-            data.get('password_hash'),
-            data.get('full_name'),
-            data.get('phone'),
-            data.get('role', Role.USER)
-        )
+            hashed_password = bcrypt.hashpw(data['password'].encode('utf-8'), bcrypt.gensalt())
+            user_data = {
+                    "email": data.get('email'),
+                    "password": hashed_password,
+                    "full_name": data.get('full_name'),
+                    "phone": data.get('phone'),
+                    "role": data.get('role', Role.USER)
+                }
+            return create_user(user_data)
     return get_all_users()
 
 @app.route('/api/users/<int:user_id>', methods=['GET'])
