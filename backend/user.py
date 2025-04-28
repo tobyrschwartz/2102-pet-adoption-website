@@ -215,6 +215,7 @@ def login(email: str, guessed_password: bytearray):
             response = {
             "message": "Login successful",
             "user_id": user.get("user_id"),
+            "full_name": user.get("full_name"),
             "role": user.get("role"),
             "redirect_url": "/admin/dashboard",
             }
@@ -222,6 +223,7 @@ def login(email: str, guessed_password: bytearray):
             response = {
             "message": "Login successful",
             "user_id": user.get("user_id"),
+            "full_name": user.get("full_name"),
             "role": user.get("role"),
             "redirect_url": "/home",
             }
