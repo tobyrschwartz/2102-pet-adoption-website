@@ -1,5 +1,6 @@
 // src/components/PetCard.tsx
 import React from 'react';
+import './Pets.css'
 
 interface Pet {
     id: number;
