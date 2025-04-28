@@ -1,6 +1,6 @@
 """Questionnaire Management Module"""
 import sqlite3
-from enums import QuestionType  # Ensure that the enums module contains a properly defined QuestionType enum
+from enums import QuestionType
 from flask import jsonify
 
 def get_db_connection():
