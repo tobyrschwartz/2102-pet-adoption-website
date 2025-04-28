@@ -1,6 +1,6 @@
 """The module for managing user-related operations."""
 import sqlite3
-from flask import jsonify, session
+from flask import jsonify, make_response, session
 from bcrypt import hashpw
 from enums import Role
 
@@ -83,6 +83,25 @@ def get_user_by_id(user_id: int):
     if 'password_hash' in user:
         del user['password_hash']
     return jsonify(user), 200
+
+def get_user_by_id_internal(user_id: int):
+    """
+    Retrieve a specific user by their ID.
+
+    :param user_id: ID of the user to retrieve
+    :return: JSON response with the user details
+    """
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute('SELECT * FROM Users WHERE user_id = ?', (user_id,))
+    user = cursor.fetchone()
+    conn.close()
+    if user is None:
+        return jsonify({"error": "User not found"}), 404
+    user = dict(user)
+    if 'password_hash' in user:
+        del user['password_hash']
+    return user
 
 def get_user_by_email(email: str):
     """
@@ -197,7 +216,7 @@ def login(email: str, guessed_password: bytearray):
             "message": "Login successful",
             "user_id": user.get("user_id"),
             "role": user.get("role"),
-            "redirect_url": "/dashboard",
+            "redirect_url": "/admin/dashboard",
             }
         else:
             response = {
@@ -217,8 +236,12 @@ def logout():
     
     :return: JSON response with the logout status
     """
+    if 'user_id' not in session:
+        return jsonify({"message": "You're already logged out"}), 200
     session.clear()
     response = {
-        "message": "Logout successful"
+        "message": "Logged out successfully"
     }
-    return jsonify(response), 200
+    resp = make_response(jsonify(response))
+    resp.delete_cookie("session")
+    return resp, 200

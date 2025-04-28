@@ -148,3 +148,66 @@ def get_applications_by_status(status: ApplicationStatus):
     for application in applications:
         application['status'] = ApplicationStatus(application['status']).name
     return jsonify(applications), 200
+
+def get_applications_by_pet(pet_id: int):
+    """
+    Retrieve applications for a specific pet.
+
+    :param pet_id: ID of the pet whose applications to retrieve
+    :return: JSON response with a list of applications for the pet
+    """
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute('''
+        SELECT * FROM applications WHERE pet_id = ?
+    ''', (pet_id,))
+    applications = cursor.fetchall()
+    conn.close()
+
+    applications = [dict(row) for row in applications]
+    if not applications:
+        return jsonify({"error": "No applications found for this pet"}), 404
+    for application in applications:
+        application['status'] = ApplicationStatus(application['status']).name
+    return jsonify(applications), 200
+
+def get_application_count():
+    """
+    Retrieve the total number of applications in the system.
+
+    :return: JSON response with the count of applications
+    """
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute('''
+        SELECT COUNT(*) FROM applications
+    ''')
+    count = cursor.fetchone()[0]
+    conn.close()
+    return jsonify({"application_count": count}), 200
+
+def get_application_count_by_status(status: ApplicationStatus):
+    """
+    Retrieve the count of applications by their status.
+    :param status: Status of the applications to count
+    :return: JSON response with the count of applications matching the status
+    """
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute('''
+        SELECT COUNT(*) FROM applications WHERE status = ?
+    ''', (status,))
+    count = cursor.fetchone()[0]
+    conn.close()
+    return jsonify({"application_count": count}), 200
+
+def get_application_status(status: str):
+    """
+    Convert a string status to the corresponding ApplicationStatus enum.
+    :param status: String representation of the application status
+    :return: ApplicationStatus enum value
+    """
+    try:
+        return ApplicationStatus[status.upper()]
+    except KeyError:
+        return None

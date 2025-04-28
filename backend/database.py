@@ -19,7 +19,6 @@ def init_db(db_name="petadoption.db", first_run=False):
         cursor.execute('DROP TABLE IF EXISTS applications')
         cursor.execute('DROP TABLE IF EXISTS questionaire_responses')
         cursor.execute('DROP TABLE IF EXISTS questions')
-        # @future us: implement notifications?
 
     # Create pets table
     cursor.execute('''
