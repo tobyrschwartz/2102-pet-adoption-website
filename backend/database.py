@@ -19,6 +19,7 @@ def init_db(db_name="petadoption.db", first_run=False):
         cursor.execute('DROP TABLE IF EXISTS applications')
         cursor.execute('DROP TABLE IF EXISTS questionaire_responses')
         cursor.execute('DROP TABLE IF EXISTS questions')
+        cursor.execute('DROP TABLE IF EXISTS choices')
 
     # Create pets table
     cursor.execute('''
@@ -83,6 +84,16 @@ def init_db(db_name="petadoption.db", first_run=False):
                     question_type TEXT NOT NULL,
                     is_required INTEGER NOT NULL DEFAULT 1,
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )
+                ''')
+    # Create options table
+    cursor.execute('''
+                CREATE TABLE IF NOT EXISTS choices (
+                    choice_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    question_id INTEGER NOT NULL,
+                    choice_text TEXT NOT NULL,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    FOREIGN KEY (question_id) REFERENCES questions(question_id)
                 )
                 ''')
 

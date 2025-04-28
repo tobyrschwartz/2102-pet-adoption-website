@@ -9,6 +9,7 @@ import Unauthorized from './components/Unauthorized'
 import Logout from './components/Logout'
 import './App.css'
 import PetsList from './components/Pets'
+import AdminApplications from './components/AdminApplications'
 
 function App() {
   return (
@@ -26,6 +27,7 @@ function App() {
           <Route path="/unauthorized" element={<Unauthorized />} />
           <Route path="/logout" element={<Logout />} />
           <Route path="/pets" element = {<PetsList />} />
+          <Route path="/admin/applications" element={<AdminApplications />} />
         </Routes>
       </div>
     </Router>

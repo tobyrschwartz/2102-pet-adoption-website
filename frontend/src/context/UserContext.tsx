@@ -37,7 +37,6 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
         .then((res) => res.json())
         .then((data) => {
             if (data.logged_in) {
-                console.log("User data:", data);
                 const { email, full_name, role, approved} = data;
                 setUser({ full_name, email , role: role as Role, approved});
               }

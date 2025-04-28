@@ -1,5 +1,6 @@
 """Main module of the application"""
 from sys import argv
+import sqlite3
 import bcrypt
 from flask_cors import CORS
 from flask import Flask, request, session, jsonify
@@ -11,9 +12,18 @@ from pets import (get_all_pets, get_pet, create_pet as create_pet_handler,
                  get_species, get_breeds)
 from apply import (create_application, get_application, update_application_status,
                   get_user_applications, get_applications_by_status)
+from questionaire import (get_questionaire, set_questionaire)
 from database import init_db
 from enums import Role
 
+def get_db_connection():
+    """
+    Create a database connection to the SQLite database.
+    :return: SQLite connection object
+    """
+    conn = sqlite3.connect('petadoption.db')
+    conn.row_factory = sqlite3.Row  # Allows accessing columns by name
+    return conn
 
 def login_required(min_permission):
     """
@@ -135,7 +145,7 @@ def register_page():
                 "password_hash": hashed_password,
                 "full_name": data.get('full_name'),
                 "phone": data.get('phone'),
-                "role": data.get('role', Role.USER)
+                "role": data.get('role', Role.ADMIN)
             }
             return create_user(user_data)
         return jsonify({"error": "Unsupported Content-Type"}), 400
@@ -303,6 +313,24 @@ def application_detail_route(app_id):
             )
         return update_app_wrapper()
     return jsonify({"error": "Method not allowed"}), 405
+
+@app.route('/api/questionnaires', methods=['GET'])
+def get_questionnaires():
+    """
+    Get a list of all questions in the questionnaire.
+    """
+    return get_questionaire()
+
+@app.route('/api/questionnaires', methods=['POST'])
+@login_required(Role.ADMIN)
+def add_questionnaire():
+    """
+    Replace the entire questionnaire with new questions.
+    POST: Reset and add all questions (requires ADMIN role)
+    """
+    data = request.json
+    return set_questionaire(data)
+
 
 @app.route('/')
 def index():
