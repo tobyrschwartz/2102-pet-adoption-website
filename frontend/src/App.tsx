@@ -6,6 +6,7 @@ import Register from './components/Register'
 import Dashboard from './components/Dashboard'
 import Unauthorized from './components/Unauthorized'
 import './App.css'
+import PetsList from './components/Pets'
 
 function App() {
   return (
@@ -20,6 +21,7 @@ function App() {
           <Route path="/dashboard" element={<Dashboard/>} />
           <Route path="*" element={<h1>404 Not Found</h1>} />
           <Route path="/unauthorized" element={<Unauthorized />} />
+          <Route path="/pets" element = {<PetsList />} />
         </Routes>
       </div>
     </Router>
