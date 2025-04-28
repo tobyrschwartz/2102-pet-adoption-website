@@ -7,7 +7,8 @@ from flasgger import Swagger
 from user import (get_user_by_id_internal, login, get_user_role, logout, create_user,
                  get_all_users, get_user_by_id)
 from pets import (get_all_pets, get_pet, create_pet as create_pet_handler,
-                 update_pet, delete_pet, search_pets, update_pet_status)
+                 update_pet, delete_pet, search_pets, update_pet_status,
+                 get_species, get_breeds)
 from apply import (create_application, get_application, update_application_status,
                   get_user_applications, get_applications_by_status)
 from database import init_db
@@ -223,6 +224,21 @@ def update_pet_status_route(pet_id):
     if not data or 'status' not in data:
         return jsonify({"error": "Invalid data"}), 400
     return update_pet_status(pet_id, data['status'])
+
+@app.route('/api/pets/species', methods=['GET'])
+def get_all_species():
+    """
+    Get a list of all species.
+    GET: Get a list of all species
+    """
+    return get_species()
+@app.route('/api/pets/breeds', methods=['GET'])
+def get_all_breeds():
+    """
+    Get a list of all breeds.
+    GET: Get a list of all breeds
+    """
+    return get_breeds()
 
 @app.route('/api/applications/count', methods=["GET"])
 @login_required(Role.STAFF)

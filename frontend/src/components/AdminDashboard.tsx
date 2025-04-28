@@ -5,7 +5,7 @@ import { useUser } from '../context/UserContext';
 const Dashboard: React.FC = () => {
     const { user } = useUser();
     const isStaff = user && user.role >= 2; 
-    //const isAdmin = user && user.role === 3; 
+    const isAdmin = user && user.role === 3; 
     const navigate = useNavigate();
     const [openApplications, setOpenApplications] = useState<number>(0);
 
@@ -44,7 +44,7 @@ const Dashboard: React.FC = () => {
                         <button 
                         onClick={() => navigate('/admin/users')}
                         style={{ marginRight: '10px' }}>View Users</button>
-                        <button>Add User</button>
+                        {isAdmin && <button>Add User</button>}
                     </section>
                     <section style={{ marginBottom: '20px' }}>
                         <h2>Pet Management</h2>
