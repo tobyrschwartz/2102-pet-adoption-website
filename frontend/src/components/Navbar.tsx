@@ -12,9 +12,7 @@ const Navbar: React.FC = () => {
         <nav>
             <ul>
                 <li><Link to="/">Home</Link></li>
-                <li><Link to="/login">Login</Link></li>
-                <li><Link to="/register">Register</Link></li>
-                <li><Link to = "/pets">PetsList</Link></li>
+                <li><Link to = "/pets">Pet List</Link></li>
                 {!user && <li><Link to="/login">Login</Link></li>}
                 {!user && <li><Link to="/register">Register</Link></li>}
                 {user && <li><Link to="/logout">Logout</Link></li>}
