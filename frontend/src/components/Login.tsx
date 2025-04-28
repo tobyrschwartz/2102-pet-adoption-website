@@ -1,7 +1,10 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useUser } from '../context/UserContext';
 
 const Login = () => {
+  const { setUser } = useUser();
+  const { user } = useUser();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
@@ -18,13 +21,23 @@ const Login = () => {
     });
     if (response.ok) {
       const data = await response.json();
-      console.log('Login successful:', data);
+      setUser({
+        full_name: data.full_name,
+        email: data.email,
+        role: data.role,
+      });
       navigate(data.redirect_url || '/');
     } else {
       const error = await response.json();
       alert(`Login failed: ${error.error}`);
     }
   };
+
+  useEffect(() => {
+    if (user) {
+      navigate('/');
+    }
+  }, [user]);
       
   return (
     <div

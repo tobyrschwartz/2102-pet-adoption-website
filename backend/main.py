@@ -4,10 +4,10 @@ import bcrypt
 from flask_cors import CORS
 from flask import Flask, request, session, jsonify
 from flasgger import Swagger
-from user import (login, get_user_role, logout, create_user,
+from user import (get_user_by_id_internal, login, get_user_role, logout, create_user,
                  get_all_users, get_user_by_id)
 from pets import (get_all_pets, get_pet, create_pet as create_pet_handler,
-                 update_pet, delete_pet, search_pets)
+                 update_pet, delete_pet, search_pets, update_pet_status)
 from apply import (create_application, get_application, update_application_status,
                   get_user_applications, get_applications_by_status)
 from database import init_db
@@ -103,30 +103,18 @@ def login_page():
         return login(data['email'], guessed_pw)
     return jsonify({"error": "Unsupported Content-Type"}), 400
 
-@app.route('/logout', methods=['GET'])
+@app.route('/logout', methods=['POST'])
 def logout_page():
     """
     User logout route.
-    It clears the session and redirects to the login page.
+    It clears the session and deletes the session cookie.
     ---
-    parameters:
-    - name: email
-          in: body
-          type: string
-          required: true 
-        - name: password
-          in: body
-          type: string
-          required: true
     responses:
         200:
-            description: Successful login
-        401:
-            description: Unauthorized login
+            description: Successful logout
 
     """
-    # Will change this to a redirect instead of just a json response
-    return logout()
+    return logout() # navigation handled by frontend
 
 @app.route('/register', methods=['POST'])
 def register_page():
@@ -146,7 +134,7 @@ def register_page():
                 hashed_password,
                 data.get('full_name'),
                 data.get('phone'),
-                data.get('role', Role.ADMIN)
+                data.get('role', Role.USER)
             )
         return jsonify({"error": "Unsupported Content-Type"}), 400
     return jsonify({"error": "Unsupported Content-Type"}), 400
@@ -176,7 +164,7 @@ def users_route():
     return get_all_users()
 
 @app.route('/api/users/<int:user_id>', methods=['GET'])
-@login_required(Role.USER)  # Any logged-in user can view user details
+@login_required(Role.STAFF)
 def user_detail_route(user_id):
     """
     User detail route.
@@ -224,11 +212,29 @@ def pet_detail_route(pet_id):
         return delete_pet_wrapper()
     return jsonify({"error": "Method not allowed"}), 405
 
-@app.route('/api/pets/create', methods=['GET'])
-@login_required(2)  # Requires at least STAFF role
-def create_pet():
-    """To be implemented, just wanted to check my decorator doesn't throw an error"""
-    return jsonify({"message": "Pet created successfully!"}), 201
+@app.route('/api/pets/<int:pet_id>/status', methods=['PUT'])
+@login_required(Role.STAFF)
+def update_pet_status_route(pet_id):
+    """
+    Update the status of a pet.
+    PUT: Update the status of a specific pet (requires STAFF role)
+    """
+    data = request.json
+    if not data or 'status' not in data:
+        return jsonify({"error": "Invalid data"}), 400
+    return update_pet_status(pet_id, data['status'])
+
+@app.route('/api/applications/count', methods=["GET"])
+@login_required(Role.STAFF)
+def get_application_count():
+    """
+    Get the count of applications, optionally filtered by status.
+    GET: Get the count of applications (requires STAFF role)
+    """
+    status = request.args.get('status')
+    if status:
+        return get_applications_by_status(status)
+    return get_application_count()
 
 # Application routes
 @app.route('/api/applications', methods=['GET', 'POST'])
@@ -305,13 +311,33 @@ def get_items():
     return jsonify(dummy_items)
 
 @app.route("/check-session")
-
 def check_session():
     """"Check the current session and return its contents."""
     return jsonify({
-        "user_id": session.get("user_id"),
-        "session_contents": dict(session),
+        "user_id": session.get("user_id")
     })
+
+@app.route('/api/me', methods=['GET'])
+@login_required(Role.USER)  # Any logged-in user can access this route
+def me():
+    """
+    Get the current user's information.
+    ---
+    responses:
+        200:
+            description: User information
+        401:
+            description: Unauthorized
+    """
+    user_id = session['user_id']
+    if not user_id:
+        return jsonify({"error": "Unauthorized"}), 401
+    user = get_user_by_id_internal(user_id)
+    if not user:
+        return jsonify({"error": "User not found"}), 404
+    user["logged_in"] = True
+    del user["created_at"]
+    return jsonify(user)
 
 # For testing purposes
 @app.route('/protected', methods=['GET'])
