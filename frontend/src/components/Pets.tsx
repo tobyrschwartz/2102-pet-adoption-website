@@ -6,6 +6,7 @@ interface Pet {
     id: number;
     name: string;
     age: number;
+    species: string;
     breed: string;
     temperament: string;
     pictureUrl: string;
@@ -15,6 +16,8 @@ const PetsList: React.FC = () => {
     const [pets, setPets] = useState<Pet[]>([]);
     const [error, setError] = useState<string>('');
     const [showFilter, setShowFilter] = useState<boolean>(false);
+    const [speciesOptions, setSpeciesOptions] = useState<string[]>([]);
+    const [breedOptions, setBreedOptions] = useState<string[]>([]);
     const [filter, setFilter] = useState({
         species: '',
         breed: '',
@@ -31,11 +34,19 @@ const PetsList: React.FC = () => {
             const response = await fetch('http://127.0.0.1:5000/api/pets');
             const data: Pet[] = await response.json();
             setPets(data);
+
+            // Extract unique species and breeds from the pet data
+            const uniqueSpecies = Array.from(new Set(data.map(p => p.species).filter(Boolean)));
+            const uniqueBreeds = Array.from(new Set(data.map(p => p.breed).filter(Boolean)));
+
+            setSpeciesOptions(uniqueSpecies);
+            setBreedOptions(uniqueBreeds);
         } catch (err) {
             setError('Could not fetch pets. Please try again later.');
             console.error('Error fetching pets:', err);
         }
     };
+    
 
     const fetchFilteredPets = async () => {
         try {
@@ -68,12 +79,10 @@ const PetsList: React.FC = () => {
             <h2>Available Pets</h2>
             {error && <p style={{ color: 'red' }}>{error}</p>}
 
-            {/* Filter Button */}
             <button onClick={() => setShowFilter(!showFilter)} className="filter-btn">
                 Filter Pets
             </button>
 
-            {/* Filter Popup */}
             {showFilter && (
                 <div className="filter-popup-overlay">
                     <div className="filter-popup">
@@ -81,25 +90,27 @@ const PetsList: React.FC = () => {
                         <form onSubmit={handleFilterSubmit}>
                             <div>
                                 <label>Species:</label>
-                                <input
-                                    type="text"
+                                <select
                                     value={filter.species}
-                                    onChange={(e) =>
-                                        setFilter({ ...filter, species: e.target.value })
-                                    }
-                                    placeholder="Enter species"
-                                />
+                                    onChange={(e) => setFilter({ ...filter, species: e.target.value })}
+                                >
+                                    <option value="">-- Select Species --</option>
+                                    {speciesOptions.map((option) => (
+                                        <option key={option} value={option}>{option}</option>
+                                    ))}
+                                </select>
                             </div>
                             <div>
                                 <label>Breed:</label>
-                                <input
-                                    type="text"
+                                <select
                                     value={filter.breed}
-                                    onChange={(e) =>
-                                        setFilter({ ...filter, breed: e.target.value })
-                                    }
-                                    placeholder="Enter breed"
-                                />
+                                    onChange={(e) => setFilter({ ...filter, breed: e.target.value })}
+                                >
+                                    <option value="">-- Select Breed --</option>
+                                    {breedOptions.map((option) => (
+                                        <option key={option} value={option}>{option}</option>
+                                    ))}
+                                </select>
                             </div>
                             <div>
                                 <label>Status:</label>
