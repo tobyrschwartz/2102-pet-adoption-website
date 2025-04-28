@@ -7,7 +7,7 @@ interface Pet {
     name: string;
     age: number;
     breed: string;
-    temperament: string;
+    description: string;
     pictureUrl: string;
 }
 
@@ -21,7 +21,7 @@ const PetCard: React.FC<PetCardProps> = ({ pet }) => (
         <h3>{pet.name}</h3>
         <p>Age: {pet.age}</p>
         <p>Breed: {pet.breed}</p>
-        <p>Temperament: {pet.temperament}</p>
+        <p>{pet.description}</p>
         <button className="select-btn">Select Pet</button>
     </div>
 );

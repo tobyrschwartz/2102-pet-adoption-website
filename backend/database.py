@@ -5,6 +5,7 @@ This file is not meant to be executed directly.
 """
 
 import sqlite3
+from enums import PetStatus
 
 def init_db(db_name="petadoption.db", first_run=False):
     """Initialize the SQLite3 database."""
@@ -102,10 +103,16 @@ def init_db(db_name="petadoption.db", first_run=False):
         cursor.execute('''
                     INSERT INTO pets (name, species, breed, age, description, status, image_url)
                     VALUES
-                    ('Larry', 'Dog', 'Golden Retriever', 3, 'Friendly and energetic.', 'Available', 'http://example.com/Larry.jpg'),
-                    ('Barry', 'Cat', 'Siamese', 2, 'Loves to cuddle.', 'Adopted', 'http://example.com/Barry.jpg'),
-                    ('Garry', 'Dog', 'Beagle', 4, 'Great with kids.', 'Available', 'http://example.com/Garry.jpg')
-                    ''')
+                    (?, ?, ?, ?, ?, ?, ?),
+                    (?, ?, ?, ?, ?, ?, ?),
+                    (?, ?, ?, ?, ?, ?, ?)
+                    ''',
+                    ('Larry', 'Dog', 'Golden Retriever', 3, 'Friendly and energetic.',
+                        PetStatus.AVAILABLE.value, 'http://example.com/Larry.jpg',
+                     'Barry', 'Cat', 'Siamese', 2, 'Loves to cuddle.', 
+                        PetStatus.ADOPTED.value, 'http://example.com/Barry.jpg',
+                     'Garry', 'Dog', 'Beagle', 4, 'Great with kids.', 
+                        PetStatus.AVAILABLE.value, 'http://example.com/Garry.jpg'))
 
     connection.commit()
     connection.close()

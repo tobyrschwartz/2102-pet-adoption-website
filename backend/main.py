@@ -14,7 +14,7 @@ from apply import (create_application, get_application, update_application_statu
                   get_user_applications, get_applications_by_status)
 from questionaire import (get_questionaire, set_questionaire)
 from database import init_db
-from enums import Role
+from enums import Role, PetStatus
 
 def get_db_connection():
     """
@@ -145,7 +145,7 @@ def register_page():
                 "password_hash": hashed_password,
                 "full_name": data.get('full_name'),
                 "phone": data.get('phone'),
-                "role": data.get('role', Role.ADMIN)
+                "role": data.get('role', Role.USER)
             }
             return create_user(user_data)
         return jsonify({"error": "Unsupported Content-Type"}), 400
@@ -198,7 +198,9 @@ def pets_route():
         return create_pet_wrapper()
     # Check if search parameters are provided
     if request.args:
-        return search_pets()
+        return search_pets(request.args.get('species'),
+                           request.args.get('breed'),
+                           PetStatus[request.args.get('status')])
     return get_all_pets()
 
 @app.route('/api/pets/<int:pet_id>', methods=['GET', 'PUT', 'DELETE'])

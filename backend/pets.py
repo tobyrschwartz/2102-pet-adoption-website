@@ -152,7 +152,7 @@ def search_pets(species: str = "", breed: str = "", status: PetStatus = PetStatu
         params.append(breed)
     if status:
         query += " AND status = ?"
-        params.append(status)
+        params.append(status.value)
     cursor.execute(query, params)
     pets = cursor.fetchall()
     conn.close()
@@ -161,7 +161,7 @@ def search_pets(species: str = "", breed: str = "", status: PetStatus = PetStatu
     # Convert pets to a list of dictionaries
     pets = [dict(pet) for pet in pets]
 
-    return jsonify([pets]), 200
+    return jsonify(pets), 200
 
 def get_breeds():
     """

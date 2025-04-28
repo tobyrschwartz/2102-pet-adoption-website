@@ -8,7 +8,7 @@ interface Pet {
     age: number;
     species: string;
     breed: string;
-    temperament: string;
+    description: string;
     pictureUrl: string;
 }
 
@@ -41,6 +41,7 @@ const PetsList: React.FC = () => {
 
             setSpeciesOptions(uniqueSpecies);
             setBreedOptions(uniqueBreeds);
+            setError(''); // Clear any previous error
         } catch (err) {
             setError('Could not fetch pets. Please try again later.');
             console.error('Error fetching pets:', err);
@@ -55,9 +56,10 @@ const PetsList: React.FC = () => {
                 breed: filter.breed,
                 status: filter.status
             }).toString();
-            const response = await fetch(`http://127.0.0.1:5000/api/pets/search?${query}`);
+            const response = await fetch(`http://127.0.0.1:5000/api/pets?${query}`);
             const data: Pet[] = await response.json();
             setPets(data);
+            setError(''); // Clear any previous error
         } catch (err) {
             setError('Could not fetch filtered pets. Please try again later.');
             console.error('Error fetching filtered pets:', err);
