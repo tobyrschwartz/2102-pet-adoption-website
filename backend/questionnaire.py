@@ -167,8 +167,7 @@ def has_answered_questionnaire(user_id):
             SELECT COUNT(*) FROM questionnaire_responses WHERE user_id = ?
         ''', (user_id,))
         count = cursor.fetchone()[0]
-
-        return jsonify({"has_open": count > 0}), 200
+        return jsonify({"has_open": bool(count > 0)}), 200
     except sqlite3.Error as e:
         return jsonify({"error": str(e)}), 500
     finally:

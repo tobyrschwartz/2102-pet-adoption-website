@@ -357,10 +357,10 @@ def has_open_questionnaire():
     user_id = request.args.get('user_id', type=int)
     if user_id:
         if session['user_id'] == user_id or get_user_role(session['user_id']) >= Role.STAFF:
-            return jsonify({"has_open": not has_answered_questionnaire(user_id)})
+            return has_answered_questionnaire(user_id)
         return jsonify({"error": "You do not have permission to access this resource"}), 403
     # If no user_id is provided, check for the logged-in user
-    return jsonify({"has_open": not has_answered_questionnaire(session['user_id'])})
+    return has_answered_questionnaire(session['user_id'])
 
 @app.route('/api/questionnaires/submit', methods=['POST'])
 @login_required(Role.USER)

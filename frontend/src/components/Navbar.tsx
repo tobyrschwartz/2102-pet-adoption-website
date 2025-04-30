@@ -14,8 +14,8 @@ const Navbar: React.FC = () => {
         { to: '/pets', label: 'Pet List' },
         !user && { to: '/login', label: 'Login' },
         !user && { to: '/register', label: 'Register' },
+        isStaff && { to: '/admin/dashboard', label: 'Admin Dashboard' },
         user && { to: '/logout', label: 'Logout' },
-        isStaff && { to: '/admin/dashboard', label: 'Admin Dashboard' }
     ].filter(Boolean) as { to: string, label: string }[];
 
     return (
