@@ -1,7 +1,7 @@
 /* Home.css */
 
 .home-container {
-    background-image: url('/images/homepage.png'); /* Add your image in public/images or update path */
+    background-image: url('../public/images/homepage.png'); 
     background-size: cover;
     background-position: center;
     height: 100vh;
