@@ -10,6 +10,7 @@ import Logout from './components/Logout'
 import './App.css'
 import PetsList from './components/Pets'
 import AdminApplications from './components/AdminApplications'
+import ConfirmPet from './components/ConfirmPet'
 
 function App() {
   return (
@@ -28,6 +29,7 @@ function App() {
           <Route path="/logout" element={<Logout />} />
           <Route path="/pets" element = {<PetsList />} />
           <Route path="/admin/applications" element={<AdminApplications />} />
+          <Route path="/confirm" element={<ConfirmPet />} />
         </Routes>
       </div>
     </Router>
