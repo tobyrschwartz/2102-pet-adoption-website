@@ -1,4 +1,5 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import { Routes, Route, useLocation } from 'react-router-dom';
+import { useEffect } from 'react'
 import { UserProvider } from './context/UserContext'
 import Home from './components/Home'
 import Login from './components/Login'
@@ -13,10 +14,22 @@ import AdminApplications from './components/AdminApplications'
 import Questionnaire from './components/Questionnaire'
 import ConfirmPet from './components/ConfirmPet'
 
+
+
 function App() {
+  const location = useLocation();
+
+  const scrollAllowedRoutes = ['/admin/applications', '/questionnaire'];
+
+  useEffect(() => {
+    if (scrollAllowedRoutes.some(path => location.pathname.startsWith(path))) {
+      document.body.style.overflowY = 'auto';
+    } else {
+      document.body.style.overflow = 'hidden';
+    }
+  }, [location]);
   return (
     <UserProvider>
-    <Router>
       <div>
         <Navbar/>
         <Routes>
@@ -34,7 +47,6 @@ function App() {
           <Route path="/confirm" element={<ConfirmPet />} />
         </Routes>
       </div>
-    </Router>
     </UserProvider>
   )
 }

@@ -20,7 +20,7 @@ const containerStyle: React.CSSProperties = {
   alignItems: 'center',
   overflowY: 'auto',
   padding: '2rem',
-  height: '100%',
+  minHeight: '100vh', 
   boxSizing: 'border-box',
 };
 
@@ -189,128 +189,130 @@ const AdminApplications: React.FC = () => {
   };
 
   return (
-    <div style={containerStyle}>
-      <h1 style={headerStyle}>Manage Application Questions</h1>
+    <div style={{ height: '90vh', overflowY: 'auto' }}>
+      <div style={containerStyle}>
+        <h1 style={headerStyle}>Manage Application Questions</h1>
 
-      {/* Add new question */}
-      <div style={{ display: 'flex', gap: '1rem', marginBottom: '2rem', flexWrap: 'wrap', justifyContent: 'center' }}>
-        <input
-          type="text"
-          placeholder="Enter a new question"
-          value={newQuestion}
-          onChange={(e) => setNewQuestion(e.target.value)}
-          style={inputStyle}
-        />
-        <select
-          value={questionType}
-          onChange={(e) => setQuestionType(e.target.value as QuestionType)}
-          style={inputStyle}
-        >
-          <option value={QuestionType.TEXT}>Text</option>
-          <option value={QuestionType.MULTIPLE_CHOICE}>Multiple Choice</option>
-        </select>
-        <button onClick={handleAddQuestion} style={buttonStyle}>
-          Add
-        </button>
-      </div>
+        {/* Add new question */}
+        <div style={{ display: 'flex', gap: '1rem', marginBottom: '2rem', flexWrap: 'wrap', justifyContent: 'center' }}>
+          <input
+            type="text"
+            placeholder="Enter a new question"
+            value={newQuestion}
+            onChange={(e) => setNewQuestion(e.target.value)}
+            style={inputStyle}
+          />
+          <select
+            value={questionType}
+            onChange={(e) => setQuestionType(e.target.value as QuestionType)}
+            style={inputStyle}
+          >
+            <option value={QuestionType.TEXT}>Text</option>
+            <option value={QuestionType.MULTIPLE_CHOICE}>Multiple Choice</option>
+          </select>
+          <button onClick={handleAddQuestion} style={buttonStyle}>
+            Add
+          </button>
+        </div>
 
-      {/* List of questions */}
-      <ul style={{ width: '100%', maxWidth: '600px', overflowY: 'auto', maxHeight: '60vh', padding: 0 }}>
-        {questions.map((question) => (
-          <li key={question.id} style={{
-            border: '1px solid #ccc',
-            borderRadius: '8px',
-            padding: '1rem',
-            marginBottom: '1rem',
-            backgroundColor: '#2b3e5c'
-          }}>
-            {editingQuestionId === question.id ? (
-              <>
-                <input
-                  type="text"
-                  value={editingText}
-                  onChange={(e) => setEditingText(e.target.value)}
-                  style={{ ...inputStyle, marginBottom: '0.5rem' }}
-                />
-                {question.type === QuestionType.MULTIPLE_CHOICE && (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginBottom: '0.5rem' }}>
-                    <h4 style={{ fontWeight: 'bold' }}>Options:</h4>
-                    {editingOptions.map((option, index) => (
-                      <div key={index} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                        <span>{option}</span>
-                        <button
-                          onClick={() => handleDeleteOption(index)}
-                          style={deleteButtonStyle}
-                        >
-                          Delete
+        {/* List of questions */}
+        <ul style={{ width: '100%', maxWidth: '600px', overflowY: 'auto', maxHeight: '60vh', padding: 0 }}>
+          {questions.map((question) => (
+            <li key={question.id} style={{
+              border: '1px solid #ccc',
+              borderRadius: '8px',
+              padding: '1rem',
+              marginBottom: '1rem',
+              backgroundColor: '#2b3e5c'
+            }}>
+              {editingQuestionId === question.id ? (
+                <>
+                  <input
+                    type="text"
+                    value={editingText}
+                    onChange={(e) => setEditingText(e.target.value)}
+                    style={{ ...inputStyle, marginBottom: '0.5rem' }}
+                  />
+                  {question.type === QuestionType.MULTIPLE_CHOICE && (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginBottom: '0.5rem' }}>
+                      <h4 style={{ fontWeight: 'bold' }}>Options:</h4>
+                      {editingOptions.map((option, index) => (
+                        <div key={index} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                          <span>{option}</span>
+                          <button
+                            onClick={() => handleDeleteOption(index)}
+                            style={deleteButtonStyle}
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      ))}
+                      <div style={{ display: 'flex', gap: '0.5rem' }}>
+                        <input
+                          type="text"
+                          placeholder="Add option"
+                          value={newOption}
+                          onChange={(e) => setNewOption(e.target.value)}
+                          style={inputStyle}
+                        />
+                        <button onClick={handleAddOption} style={saveButtonStyle}>
+                          Add Option
                         </button>
                       </div>
-                    ))}
+                    </div>
+                  )}
+                  <div style={{ display: 'flex', gap: '1rem' }}>
+                    <button onClick={handleSaveEdit} style={saveButtonStyle}>
+                      Save
+                    </button>
+                    <button onClick={() => setEditingQuestionId(null)} style={buttonStyle}>
+                      Cancel
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ fontWeight: 'bold' }}>{question.text}</span>
                     <div style={{ display: 'flex', gap: '0.5rem' }}>
-                      <input
-                        type="text"
-                        placeholder="Add option"
-                        value={newOption}
-                        onChange={(e) => setNewOption(e.target.value)}
-                        style={inputStyle}
-                      />
-                      <button onClick={handleAddOption} style={saveButtonStyle}>
-                        Add Option
+                      <button
+                        onClick={() => handleEditQuestion(question.id)}
+                        style={editButtonStyle}
+                      >
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => handleDeleteQuestion(question.id)}
+                        style={deleteButtonStyle}
+                      >
+                        Delete
                       </button>
                     </div>
                   </div>
-                )}
-                <div style={{ display: 'flex', gap: '1rem' }}>
-                  <button onClick={handleSaveEdit} style={saveButtonStyle}>
-                    Save
-                  </button>
-                  <button onClick={() => setEditingQuestionId(null)} style={buttonStyle}>
-                    Cancel
-                  </button>
-                </div>
-              </>
-            ) : (
-              <>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span style={{ fontWeight: 'bold' }}>{question.text}</span>
-                  <div style={{ display: 'flex', gap: '0.5rem' }}>
-                    <button
-                      onClick={() => handleEditQuestion(question.id)}
-                      style={editButtonStyle}
-                    >
-                      Edit
-                    </button>
-                    <button
-                      onClick={() => handleDeleteQuestion(question.id)}
-                      style={deleteButtonStyle}
-                    >
-                      Delete
-                    </button>
-                  </div>
-                </div>
-                {question.type === QuestionType.MULTIPLE_CHOICE && (
-                  <ul style={{ marginTop: '0.5rem', paddingLeft: '1rem' }}>
-                    {question.options?.map((option, index) => (
-                      <li key={index} style={{ fontSize: '0.9rem', color: '#fff00' }}>
-                        {option}
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </>
-            )}
-          </li>
-        ))}
-      </ul>
+                  {question.type === QuestionType.MULTIPLE_CHOICE && (
+                    <ul style={{ marginTop: '0.5rem', paddingLeft: '1rem' }}>
+                      {question.options?.map((option, index) => (
+                        <li key={index} style={{ fontSize: '0.9rem', color: '#fff00' }}>
+                          {option}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </>
+              )}
+            </li>
+          ))}
+        </ul>
 
-      {/* Save all questions */}
-      <button
-        onClick={handleSaveQuestions}
-        disabled={saving}
-        style={{ ...saveButtonStyle, marginTop: '2rem' }}
-      >
-        {saving ? "Saving..." : "Save All Changes"}
-      </button>
+        {/* Save all questions */}
+        <button
+          onClick={handleSaveQuestions}
+          disabled={saving}
+          style={{ ...saveButtonStyle, marginTop: '2rem' }}
+        >
+          {saving ? "Saving..." : "Save All Changes"}
+        </button>
+      </div>
     </div>
   );
 };

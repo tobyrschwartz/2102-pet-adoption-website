@@ -113,6 +113,29 @@ def init_db(db_name="petadoption.db", first_run=False):
                         PetStatus.ADOPTED.value, 'http://example.com/Barry.jpg',
                      'Garry', 'Dog', 'Beagle', 4, 'Great with kids.', 
                         PetStatus.AVAILABLE.value, 'http://example.com/Garry.jpg'))
+        cursor.execute('''
+                    INSERT INTO pets (name, species, breed, age, description, status, image_url)
+                    VALUES
+                    (?, ?, ?, ?, ?, ?, ?),
+                    (?, ?, ?, ?, ?, ?, ?),
+                    (?, ?, ?, ?, ?, ?, ?)
+                    ''',
+                    ('Marry', 'Cat', 'Orange', 3, 'Hates little children.',
+                        PetStatus.AVAILABLE.value, 'http://example.com/Marry.jpg',
+                     'Parry', 'Parrot', 'Cockatoo', 2, 'Super annoying', 
+                        PetStatus.AVAILABLE.value, 'http://example.com/Barry.jpg',
+                     'Tarry', 'Eagle', 'Bald Eagle', 4, 'Super scary', 
+                        PetStatus.AVAILABLE.value, 'http://example.com/Garry.jpg'))
+        cursor.execute('''
+                    INSERT INTO pets (name, species, breed, age, description, status, image_url)
+                    VALUES
+                    (?, ?, ?, ?, ?, ?, ?),
+                    (?, ?, ?, ?, ?, ?, ?)
+                    ''',
+                    ('Farry', 'Ferret', 'Sable', 3, 'Friendly and energetic.',
+                        PetStatus.AVAILABLE.value, 'http://example.com/Larry.jpg',
+                     'Harry', 'Dog', 'Mutt', 2, 'Loves to cuddle.', 
+                        PetStatus.ADOPTED.value, 'http://example.com/Barry.jpg'))
 
     connection.commit()
     connection.close()

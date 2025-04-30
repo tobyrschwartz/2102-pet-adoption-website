@@ -1,7 +1,7 @@
 /* Home.css */
 
 .home-container {
-    background-image: url('../public/images/homepage.png'); 
+    background-image: url('../images/homepage.png'); 
     background-size: cover;
     background-position: center;
     height: 100vh;
@@ -12,6 +12,7 @@
     text-align: center;
     padding: 20px;
     color: white;
+    overflow: hidden;
 }
 
 .home-content {
