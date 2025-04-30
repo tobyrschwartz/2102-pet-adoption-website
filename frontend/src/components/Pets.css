@@ -58,12 +58,17 @@ p {
 }
 
 .filter-btn {
-    padding: 10px 20px;
+    position: absolute;
+    bottom: 20px;
+    right: 30 px;
+    padding: 8px 16px;
     background-color: #4CAF50;
     color: white;
     border: none;
     border-radius: 5px;
     cursor: pointer;
+    font-size: 0.9em;
+    z-index: 1000;
 }
 
 .filter-btn:hover {
