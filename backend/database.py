@@ -66,13 +66,13 @@ def init_db(db_name="petadoption.db", first_run=False):
             ''')
     # Create questionaire_responses table
     cursor.execute('''
-                CREATE TABLE IF NOT EXISTS questionaire_responses (
+                CREATE TABLE IF NOT EXISTS questionnaire_responses (
                     response_id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    application_id INTEGER NOT NULL,
+                    user_id INTEGER NOT NULL,
                     question_id INTEGER NOT NULL,
                     answer_text TEXT NOT NULL,
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                    FOREIGN KEY (application_id) REFERENCES applications(application_id),
+                    FOREIGN KEY (user_id) REFERENCES users(user_id),
                     FOREIGN KEY (question_id) REFERENCES questions(question_id)
                 )
                 ''')

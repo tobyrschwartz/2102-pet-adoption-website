@@ -12,7 +12,8 @@ from pets import (get_all_pets, get_pet, create_pet as create_pet_handler,
                  get_species, get_breeds)
 from apply import (create_application, get_application, update_application_status,
                   get_user_applications, get_applications_by_status)
-from questionaire import (get_questionaire, set_questionaire)
+from questionnaire import (get_answered_questionnaire, set_questionnaire,
+                           get_questionnaire, answer_questionnaire, has_answered_questionnaire)
 from database import init_db
 from enums import Role, PetStatus
 
@@ -321,7 +322,7 @@ def get_questionnaires():
     """
     Get a list of all questions in the questionnaire.
     """
-    return get_questionaire()
+    return get_questionnaire()
 
 @app.route('/api/questionnaires', methods=['POST'])
 @login_required(Role.ADMIN)
@@ -331,8 +332,47 @@ def add_questionnaire():
     POST: Reset and add all questions (requires ADMIN role)
     """
     data = request.json
-    return set_questionaire(data)
+    return set_questionnaire(data)
 
+@app.route('/api/questionnaires/<int:user_id>', methods=['GET'])
+@login_required(Role.USER)
+def get_questionnaire_by_id(user_id):
+    """
+    Get a specific questionnaire by its ID.
+    STAFF can view any questionnaire, while USERS can only view their own.
+    GET: Get details of a specific questionnaire
+    """
+    if session['user_id'] == user_id or get_user_role(session['user_id']) >= Role.STAFF:
+        return get_answered_questionnaire(user_id)
+    return jsonify({"error": "You do not have permission to access this resource"}), 403
+
+@app.route('/api/questionnaires/hasOpen', methods=['GET'])
+@login_required(Role.USER)
+def has_open_questionnaire():
+    """
+    Check if a user has an open questionnaire.
+    STAFF can check for any user, while USERS can only check for themselves.
+    GET: Check if a user has an open questionnaire
+    """
+    user_id = request.args.get('user_id', type=int)
+    if user_id:
+        if session['user_id'] == user_id or get_user_role(session['user_id']) >= Role.STAFF:
+            return jsonify({"has_open": not has_answered_questionnaire(user_id)})
+        return jsonify({"error": "You do not have permission to access this resource"}), 403
+    # If no user_id is provided, check for the logged-in user
+    return jsonify({"has_open": not has_answered_questionnaire(session['user_id'])})
+
+@app.route('/api/questionnaires/submit', methods=['POST'])
+@login_required(Role.USER)
+def submit_questionnaire():
+    """
+    Submit answers to the questionnaire.
+    POST: Save user answers (requires USER role)
+    """
+    data = request.json
+    if not data or 'answers' not in data:
+        return jsonify({"error": "Invalid data"}), 400
+    return answer_questionnaire(session['user_id'], data)
 
 @app.route('/')
 def index():

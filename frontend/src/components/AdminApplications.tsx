@@ -20,7 +20,8 @@ const containerStyle: React.CSSProperties = {
   alignItems: 'center',
   overflowY: 'auto',
   padding: '2rem',
-  
+  height: '100%',
+  boxSizing: 'border-box',
 };
 
 const headerStyle: React.CSSProperties = {
@@ -214,7 +215,7 @@ const AdminApplications: React.FC = () => {
       </div>
 
       {/* List of questions */}
-      <ul style={{ width: '100%', maxWidth: '600px' }}>
+      <ul style={{ width: '100%', maxWidth: '600px', overflowY: 'auto', maxHeight: '60vh', padding: 0 }}>
         {questions.map((question) => (
           <li key={question.id} style={{
             border: '1px solid #ccc',
@@ -315,3 +316,6 @@ const AdminApplications: React.FC = () => {
 };
 
 export default AdminApplications;
+export type { Question };
+export { QuestionType };
+
