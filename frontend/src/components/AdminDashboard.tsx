@@ -54,7 +54,7 @@ const Dashboard: React.FC = () => {
                         onClick={() => navigate('/pets')}
                         style={{ marginRight: '10px' }}>View Pets</button>
                         <button
-                        onClick={() => navigate('admin/pets')}>Manage Pets</button>
+                        onClick={() => navigate('/admin/pets')}>Manage Pets</button>
                     </section>
                     <section>
                         <h2>Applications</h2>
