@@ -58,7 +58,10 @@ const Dashboard: React.FC = () => {
                     <section>
                         <h2>Applications</h2>
                         <p>There are {openApplications} open applications.</p>
-                        <button>Review Applications</button>
+                        <button
+                        onClick={() => navigate('/staff/review')}>
+                            Review Applications
+                            </button>
                         {isAdmin && (
                             <button
                             onClick={() => navigate('/admin/applications')}

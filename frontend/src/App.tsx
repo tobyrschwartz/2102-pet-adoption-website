@@ -14,6 +14,7 @@ import AdminApplications from './components/AdminApplications'
 import AdminManagePets from './components/AdminManagePets'
 import Questionnaire from './components/Questionnaire'
 import ConfirmPet from './components/ConfirmPet'
+import StaffReviewQuestionnaires from './components/StaffReviewQuestionnaires';
 
 
 
@@ -47,6 +48,7 @@ function App() {
           <Route path="/admin/pets" element={<AdminManagePets />} />
           <Route path="/questionnaire" element={<Questionnaire />} />
           <Route path="/confirm" element={<ConfirmPet />} />
+          <Route path="/staff/review" element={<StaffReviewQuestionnaires />} />
         </Routes>
       </div>
     </UserProvider>
