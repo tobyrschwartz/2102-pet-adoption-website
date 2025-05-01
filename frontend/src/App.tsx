@@ -11,15 +11,17 @@ import Logout from './components/Logout'
 import './App.css'
 import PetsList from './components/Pets'
 import AdminApplications from './components/AdminApplications'
+import AdminManagePets from './components/AdminManagePets'
 import Questionnaire from './components/Questionnaire'
 import ConfirmPet from './components/ConfirmPet'
+import StaffReviewQuestionnaires from './components/StaffReviewQuestionnaires';
 
 
 
 function App() {
   const location = useLocation();
 
-  const scrollAllowedRoutes = ['/admin/applications', '/questionnaire'];
+  const scrollAllowedRoutes = ['/admin/applications', '/questionnaire', '/admin/pets'];
 
   useEffect(() => {
     if (scrollAllowedRoutes.some(path => location.pathname.startsWith(path))) {
@@ -43,8 +45,10 @@ function App() {
           <Route path="/logout" element={<Logout />} />
           <Route path="/pets" element = {<PetsList />} />
           <Route path="/admin/applications" element={<AdminApplications />} />
+          <Route path="/admin/pets" element={<AdminManagePets />} />
           <Route path="/questionnaire" element={<Questionnaire />} />
           <Route path="/confirm" element={<ConfirmPet />} />
+          <Route path="/staff/review" element={<StaffReviewQuestionnaires />} />
         </Routes>
       </div>
     </UserProvider>

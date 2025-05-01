@@ -10,7 +10,6 @@ const Dashboard: React.FC = () => {
     const [openApplications, setOpenApplications] = useState<number>(0);
 
     useEffect(() => {
-        if (user === null) return;
 
         if (!isStaff) {
             navigate('/unauthorized');
@@ -27,7 +26,7 @@ const Dashboard: React.FC = () => {
         };
 
         fetchOpenApplications();
-    }, [user]);
+    }, [user, isStaff]);
 
     return (
         <div
@@ -54,12 +53,15 @@ const Dashboard: React.FC = () => {
                         onClick={() => navigate('/pets')}
                         style={{ marginRight: '10px' }}>View Pets</button>
                         <button
-                        onClick={() => navigate('admin/pets')}>Manage Pets</button>
+                        onClick={() => navigate('/admin/pets')}>Manage Pets</button>
                     </section>
                     <section>
                         <h2>Applications</h2>
                         <p>There are {openApplications} open applications.</p>
-                        <button>Review Applications</button>
+                        <button
+                        onClick={() => navigate('/staff/review')}>
+                            Review Applications
+                            </button>
                         {isAdmin && (
                             <button
                             onClick={() => navigate('/admin/applications')}

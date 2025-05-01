@@ -25,6 +25,7 @@ const Login = () => {
         full_name: data.full_name,
         email: data.email,
         role: data.role,
+        approved: data.approved,
       });
       navigate(data.redirect_url || '/');
     } else {

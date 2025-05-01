@@ -12,7 +12,7 @@ from pets import (get_all_pets, get_pet, create_pet as create_pet_handler,
                  get_species, get_breeds)
 from apply import (create_application, get_application, update_application_status,
                   get_user_applications, get_applications_by_status)
-from questionnaire import (get_answered_questionnaire, set_questionnaire,
+from questionnaire import (approve_questionnaire, get_answered_questionnaire, get_open_questionnaires, set_questionnaire,
                            get_questionnaire, answer_questionnaire, has_answered_questionnaire)
 from database import init_db
 from enums import Role, PetStatus
@@ -373,6 +373,24 @@ def submit_questionnaire():
     if not data or 'answers' not in data:
         return jsonify({"error": "Invalid data"}), 400
     return answer_questionnaire(session['user_id'], data)
+
+@app.route('/api/questionnaires/review', methods=['GET'])
+@login_required(Role.STAFF)
+def review_questionnaire():
+    """
+    Get all answered questionnaires that are not yet reviewed.
+    GET: Get all answered questionnaires that are not yet reviewed (requires STAFF role)
+    """
+    return get_open_questionnaires()
+
+@app.route('/api/users/<int:user_id>/approve', methods=['POST'])
+@login_required(Role.STAFF)
+def approve_questionnaire_route(user_id):
+    """
+    Approve a questionnaire.
+    POST: Approve a questionnaire (requires STAFF role)
+    """
+    return approve_questionnaire(user_id)
 
 @app.route('/')
 def index():

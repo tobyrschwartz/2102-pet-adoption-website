@@ -172,3 +172,56 @@ def has_answered_questionnaire(user_id):
         return jsonify({"error": str(e)}), 500
     finally:
         conn.close()
+
+def get_open_questionnaires():
+    """
+    Retrieve all users who have submitted questionnaires
+    but are not yet approved.
+    """
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    try:
+        # Get distinct users who have responded and are not approved
+        cursor.execute('''
+            SELECT DISTINCT u.user_id, u.full_name
+            FROM users u
+            JOIN questionnaire_responses qr ON u.user_id = qr.user_id
+            WHERE u.approved = 0
+        ''')
+        rows = cursor.fetchall()
+
+        open_questionnaires = []
+        for row in rows:
+            open_questionnaires.append({
+                'id': row['user_id'],               # using user_id as identifier
+                'applicantId': row['user_id'],
+                'applicantName': row['full_name'],
+                'status': 'open'
+            })
+
+        return jsonify(open_questionnaires), 200
+    except sqlite3.Error as e:
+        return jsonify({"error": str(e)}), 500
+    finally:
+        conn.close()
+
+def approve_questionnaire(user_id):
+    """
+    Approve the questionnaire for a user.
+    POST: Approve the questionnaire (requires ADMIN role)
+    """
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute('''
+            UPDATE users
+            SET approved = 1
+            WHERE user_id = ?
+        ''', (user_id,))
+        conn.commit()
+    except sqlite3.Error as e:
+        conn.rollback()
+        return jsonify({"error": str(e)}), 500
+    finally:
+        conn.close()
+    return jsonify({"message": "Questionnaire approved successfully."}), 200
