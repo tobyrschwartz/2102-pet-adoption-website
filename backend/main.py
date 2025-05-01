@@ -12,7 +12,8 @@ from pets import (get_all_pets, get_pet, create_pet as create_pet_handler,
                  get_species, get_breeds)
 from apply import (create_application, get_application, update_application_status,
                   get_user_applications, get_applications_by_status)
-from questionnaire import (approve_questionnaire, get_answered_questionnaire, get_open_questionnaires, set_questionnaire,
+from questionnaire import (approve_questionnaire, get_answered_questionnaire,
+                           get_open_questionnaires,set_questionnaire,
                            get_questionnaire, answer_questionnaire, has_answered_questionnaire)
 from database import init_db
 from enums import Role, PetStatus
