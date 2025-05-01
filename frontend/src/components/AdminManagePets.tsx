@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from '../context/UserContext';
-import PetCard from './PetCard';
 import './AdminManagePets.css';
 
 interface Pet {
@@ -39,8 +38,6 @@ const AdminManagePets: React.FC = () => {
     });
 
     useEffect(() => {
-        if (user === null) return;
-
         if (!isStaff) {
             navigate('/unauthorized');
             return;

@@ -10,7 +10,6 @@ const Dashboard: React.FC = () => {
     const [openApplications, setOpenApplications] = useState<number>(0);
 
     useEffect(() => {
-        if (user === null) return;
 
         if (!isStaff) {
             navigate('/unauthorized');
@@ -27,7 +26,7 @@ const Dashboard: React.FC = () => {
         };
 
         fetchOpenApplications();
-    }, [user]);
+    }, [user, isStaff]);
 
     return (
         <div

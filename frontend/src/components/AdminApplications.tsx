@@ -81,7 +81,6 @@ const AdminApplications: React.FC = () => {
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    if (user === null) return;
     if (!isAdmin) {
       navigate('/unauthorized');
       return;
@@ -112,7 +111,7 @@ const AdminApplications: React.FC = () => {
     };
   
     loadQuestions();
-  }, [user]);
+  }, [user, isAdmin]);
 
   const handleAddQuestion = () => {
     if (newQuestion.trim() === "") return;
