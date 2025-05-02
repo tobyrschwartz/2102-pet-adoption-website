@@ -11,7 +11,7 @@ from pets import (get_all_pets, get_pet, create_pet as create_pet_handler,
                  update_pet, delete_pet, search_pets, update_pet_status,
                  get_species, get_breeds)
 from apply import (create_application, get_application, update_application_status,
-                  get_user_applications, get_applications_by_status)
+                  get_user_applications, get_applications_by_status, get_all_applications)
 from questionnaire import (approve_questionnaire, get_answered_questionnaire,
                            get_open_questionnaires,set_questionnaire,
                            get_number_of_open_questionnaires,
@@ -276,7 +276,6 @@ def applications_route():
     POST: Create a new application (requires USER role)
     """
     if request.method == 'POST':
-        print('we did it')
         @login_required(Role.USER)
         def create_app_wrapper():
             data = request.json
@@ -284,18 +283,18 @@ def applications_route():
                 session['user_id'],
                 data.get('pet_id'))
         return create_app_wrapper()
-    # Check if filtering by status
+
     status = request.args.get('status')
     if status:
         @login_required(Role.STAFF)
         def get_by_status_wrapper():
             return get_applications_by_status(status)
         return get_by_status_wrapper()
-    # User can only see their own applications
-    @login_required(Role.USER)
-    def get_user_apps_wrapper():
-        return get_user_applications(session['user_id'])
-    return get_user_apps_wrapper()
+
+    @login_required(Role.STAFF)
+    def get_all_apps_wrapper():
+        return get_all_applications()
+    return get_all_apps_wrapper()
 
 @app.route('/api/applications/<int:app_id>', methods=['GET', 'PUT'])
 def application_detail_route(app_id):

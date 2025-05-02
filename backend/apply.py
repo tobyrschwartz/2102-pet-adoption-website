@@ -87,6 +87,38 @@ def get_application(application_id: int):
         "responses": responses
     }), 200
 
+def get_all_applications():
+    """
+    Retrieve all applications in the system.
+    :return: JSON response with a list of all applications
+    """
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute('''
+        SELECT 
+            a.application_id as id,
+            a.application_id,
+            a.user_id as applicantId,
+            u.full_name as applicantName,
+            a.status,
+            a.pet_id,
+            a.submitted_at,
+            a.updated_at,
+            a.reviewed_at,
+            a.reviewer_id
+        FROM applications a
+        JOIN users u ON a.user_id = u.id
+    ''')
+    applications = cursor.fetchall()
+    conn.close()
+    if not applications:
+        return jsonify([]), 200
+    applications = [dict(row) for row in applications]
+    for app in applications:
+        app['status'] = ApplicationStatus(app['status']).name
+    return jsonify(applications), 200
+
+
 def update_application_status(application_id: int, status: ApplicationStatus, reviewer_id: int):
     """
     Update the status of an application.
