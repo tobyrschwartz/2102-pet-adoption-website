@@ -15,7 +15,7 @@ interface Pet {
 }
 
 const AdminManagePets: React.FC = () => {
-    const { user } = useUser();
+    const { user, isLoading } = useUser();
     const isStaff = user && user.role >= 2;
     const navigate = useNavigate();
     
@@ -38,6 +38,7 @@ const AdminManagePets: React.FC = () => {
     });
 
     useEffect(() => {
+        if (isLoading) return;
         if (!isStaff) {
             navigate('/unauthorized');
             return;

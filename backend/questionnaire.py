@@ -1,5 +1,6 @@
 """Questionnaire Management Module"""
 import sqlite3
+from user import get_user_by_id_internal
 from enums import QuestionType
 from flask import jsonify
 
@@ -160,6 +161,11 @@ def has_answered_questionnaire(user_id):
     Check if the user has answered the questionnaire.
     GET: Check if the user has submitted answers
     """
+    user = get_user_by_id_internal(user_id)
+    if not user:
+        return jsonify({"error": "User not found"}), 404
+    if user['approved']:
+        return jsonify({"has_open": bool(False)}), 200
     conn = get_db_connection()
     cursor = conn.cursor()
     try:
@@ -200,6 +206,26 @@ def get_open_questionnaires():
             })
 
         return jsonify(open_questionnaires), 200
+    except sqlite3.Error as e:
+        return jsonify({"error": str(e)}), 500
+    finally:
+        conn.close()
+
+def get_number_of_open_questionnaires():
+    """
+    Retrieve the number of open questionnaires.
+    """
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute('''
+            SELECT COUNT(DISTINCT u.user_id)
+            FROM users u
+            JOIN questionnaire_responses qr ON u.user_id = qr.user_id
+            WHERE u.approved = 0
+        ''')
+        count = cursor.fetchone()[0]
+        return jsonify({"open_questionnaires_count": count}), 200
     except sqlite3.Error as e:
         return jsonify({"error": str(e)}), 500
     finally:

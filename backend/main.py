@@ -14,6 +14,7 @@ from apply import (create_application, get_application, update_application_statu
                   get_user_applications, get_applications_by_status)
 from questionnaire import (approve_questionnaire, get_answered_questionnaire,
                            get_open_questionnaires,set_questionnaire,
+                           get_number_of_open_questionnaires,
                            get_questionnaire, answer_questionnaire, has_answered_questionnaire)
 from database import init_db
 from enums import Role, PetStatus
@@ -275,14 +276,13 @@ def applications_route():
     POST: Create a new application (requires USER role)
     """
     if request.method == 'POST':
+        print('we did it')
         @login_required(Role.USER)
         def create_app_wrapper():
             data = request.json
             return create_application(
                 session['user_id'],
-                data.get('pet_id'),
-                data.get('application_data', {})
-            )
+                data.get('pet_id'))
         return create_app_wrapper()
     # Check if filtering by status
     status = request.args.get('status')
@@ -392,6 +392,15 @@ def approve_questionnaire_route(user_id):
     POST: Approve a questionnaire (requires STAFF role)
     """
     return approve_questionnaire(user_id)
+
+@app.route('/api/questionnaires/open', methods=['GET'])
+@login_required(Role.STAFF)
+def get_open_questionnaires_route():
+    """
+    Get the number of open questionnaires.
+    GET: Get the number of open questionnaires (requires STAFF role)
+    """
+    return get_number_of_open_questionnaires()
 
 @app.route('/')
 def index():

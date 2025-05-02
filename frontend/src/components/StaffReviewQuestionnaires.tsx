@@ -16,7 +16,7 @@ interface Response {
   }
 
 const StaffReviewQuestionnaires: React.FC = () => {
-    const { user } = useUser();
+    const { user, isLoading } = useUser();
     const navigate = useNavigate();
     const [questionnaires, setQuestionnaires] = useState<Questionnaire[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
@@ -26,10 +26,11 @@ const StaffReviewQuestionnaires: React.FC = () => {
     const [modalOpen, setModalOpen] = useState(false);
 
     useEffect(() => {
-    if (!user || user.role <= 2) {
-        setLoading(false);
-        navigate('/unauthorized');
-        return;
+        if (isLoading) return;
+        if (!user || user.role <= 2) {
+            setLoading(false);
+            navigate('/unauthorized');
+            return;
     }
     const fetchQuestionnaires = async () => {
         try {

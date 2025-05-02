@@ -13,7 +13,7 @@ def get_db_connection():
     return conn
 
 
-def create_application(user_id: int, pet_id: int, application_data: dict):
+def create_application(user_id: int, pet_id: int):
     """
     Create a new adoption application for a pet.
     
@@ -24,17 +24,14 @@ def create_application(user_id: int, pet_id: int, application_data: dict):
     """
     conn = get_db_connection()
     cursor = conn.cursor()
+    if pet_id is None:
+        conn.close()
+        return jsonify({"error": "Pet ID cannot be null"}), 400
+
     cursor.execute('''
         INSERT INTO applications (user_id, pet_id, status)
-        VALUES (?, ?, ?, ?, ?, ?)
-    ''', (user_id, pet_id,  ApplicationStatus.PENDING))
-
-    application_id = cursor.lastrowid
-    for question_id, answer_text in application_data.items():
-        cursor.execute('''
-            INSERT INTO questionaire_responses (application_id, question_id, answer_text)
-            VALUES (?, ?, ?)
-        ''', (application_id, question_id, answer_text))
+        VALUES (?, ?, ?)
+    ''', (user_id, pet_id, ApplicationStatus.PENDING))
     conn.commit()
     conn.close()
     return jsonify("Application created successfully."), 201
@@ -52,15 +49,10 @@ def get_application_full(application_id: int):
         SELECT * FROM applications WHERE application_id = ?
     ''', (application_id,))
     application = cursor.fetchone()
-    cursor.execute('''
-        SELECT * FROM questionaire_responses WHERE application_id = ?
-    ''', (application_id,))
-    responses = cursor.fetchall()
     conn.close()
     if application is None:
         return jsonify({"error": "Application not found"}), 404
     application = dict(application)
-    application['responses'] = [dict(response) for response in responses]
     application['status'] = ApplicationStatus(application['status']).name
     return jsonify(application), 200
 
@@ -73,16 +65,27 @@ def get_application(application_id: int):
     """
     conn = get_db_connection()
     cursor = conn.cursor()
-    cursor.execute('''
-        SELECT * FROM applications WHERE application_id = ?
-    ''', (application_id,))
-    application = cursor.fetchone()
-    conn.close()
-    if application is None:
+
+    cursor.execute('SELECT * FROM applications WHERE application_id = ?', (application_id,))
+    app_row = cursor.fetchone()
+    if not app_row:
+        conn.close()
         return jsonify({"error": "Application not found"}), 404
-    application = dict(application)
-    application['status'] = ApplicationStatus(application['status']).name
-    return jsonify(application), 200
+
+    application = dict(app_row)
+
+    cursor.execute('''
+        SELECT text, type, answer 
+        FROM questionnaire_responses 
+        WHERE user_id = ?
+    ''', (application['user_id'],))
+    responses = [dict(row) for row in cursor.fetchall()]
+    conn.close()
+
+    return jsonify({
+        "application": application,
+        "responses": responses
+    }), 200
 
 def update_application_status(application_id: int, status: ApplicationStatus, reviewer_id: int):
     """

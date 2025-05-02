@@ -12,9 +12,26 @@ const ConfirmPet = () => {
         return <p>Pet data is missing. Please go back and select a pet.</p>;
     }
 
-    const handleConfirm = () => {
+    const handleConfirm = async () => {
+        //debug print the pet
+        console.log('Pet data:', pet);
         // Handle submission logic here
-        alert(`You have selected ${pet.name} for adoption!`);
+        const response = await fetch('http://localhost:5000/api/applications', {
+            method: 'POST',
+            credentials: 'include',
+            headers: {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json'
+            },
+            body: JSON.stringify({ pet_id: pet?.pet_id || null }),
+          });
+          if (response.ok) {
+
+          } else {
+            const error = await response.json();
+            alert(`Application failed: ${error.error}`);
+          }
+        alert(`You have applied to adopt ${pet.name}!`);
         navigate('/'); // Redirect to home or another page
     };
 

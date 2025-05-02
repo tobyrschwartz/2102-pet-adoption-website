@@ -67,7 +67,7 @@ const editButtonStyle: React.CSSProperties = {
 };
 
 const AdminApplications: React.FC = () => {
-  const { user } = useUser();
+  const { user, isLoading } = useUser();
   const isAdmin = user && user.role === 3;
   const navigate = useNavigate();
 
@@ -81,6 +81,7 @@ const AdminApplications: React.FC = () => {
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
+    if (isLoading) return;
     if (!isAdmin) {
       navigate('/unauthorized');
       return;

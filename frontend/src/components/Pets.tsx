@@ -41,7 +41,7 @@ const PetsList: React.FC = () => {
         if (!user) return;
         
         try {
-            const response = await fetch('http://127.0.0.1:5000/api/questionnaires/hasOpen', {
+            const response = await fetch('http://localhost:5000/api/questionnaires/hasOpen', {
                 method: 'GET',
                 credentials: 'include',
             });
@@ -62,7 +62,7 @@ const PetsList: React.FC = () => {
 
     const fetchPets = async () => {
         try {
-            const response = await fetch('http://127.0.0.1:5000/api/pets');
+            const response = await fetch('http://localhost:5000/api/pets');
             const data: Pet[] = await response.json();
             setPets(data);
 
@@ -87,7 +87,7 @@ const PetsList: React.FC = () => {
                 breed: filter.breed,
                 status: filter.status
             }).toString();
-            const response = await fetch(`http://127.0.0.1:5000/api/pets?${query}`);
+            const response = await fetch(`http://localhost:5000/api/pets?${query}`);
             const data: Pet[] = await response.json();
             setPets(data);
             setError(''); // Clear any previous error

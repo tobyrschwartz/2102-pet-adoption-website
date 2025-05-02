@@ -3,13 +3,14 @@ import { useNavigate } from 'react-router-dom';
 import { useUser } from '../context/UserContext';
 
 const Dashboard: React.FC = () => {
-    const { user } = useUser();
+    const { user, isLoading } = useUser();
     const isStaff = user && user.role >= 2; 
     const isAdmin = user && user.role === 3; 
     const navigate = useNavigate();
     const [openQuestionnaires, setOpenQuestionnaires] = useState<number>(0);
 
     useEffect(() => {
+        if (isLoading) return;
         if (!isStaff) {
             navigate('/unauthorized');
         }
