@@ -81,13 +81,30 @@ const StaffReviewApplications: React.FC = () => {
     setSelectedApplicant(app);
     setModalOpen(true);
     try {
-      const res = await fetch(`http://localhost:5000/api/applications/${app.id}/`, {
+      const res = await fetch(`http://localhost:5000/api/applications/${app.id}`, {
         credentials: 'include',
       });
       if (!res.ok) throw new Error('Failed to load details');
       const data = await res.json();
-      setAppDetails(data.application);
-      setResponses(data.responses);
+      setAppDetails({
+        application_id: data.application.application_id,
+        pet_id: data.application.pet_id,
+        reviewed_at: data.application.reviewed_at,
+        reviewer_id: data.application.reviewer_id,
+        status: data.application.status,
+        submitted_at: data.application.submitted_at,
+        updated_at: data.application.updated_at,
+        applicantId: data.application.user_id,
+        applicantName: app.applicantName,
+        id: app.id, // Retaining the original ID
+      });
+      setResponses(
+        data.responses.map((resp: any) => ({
+          text: resp.question_text,
+          type: 'text',
+          answer: resp.answer_text,
+        }))
+      );
     } catch {
       setAppDetails(null);
       setResponses([]);
@@ -96,10 +113,11 @@ const StaffReviewApplications: React.FC = () => {
 
   const handleApprove = async (userId: number) => {
     try {
-      const res = await fetch(`http://localhost:5000/api/users/${userId}/approve`, {
+      const res = await fetch(`http://localhost:5000/api/applications/${appDetails?.application_id}`, {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: 'Approved'}),
       });
 
       if (!res.ok) throw new Error('Failed to approve application.');
@@ -157,9 +175,12 @@ const StaffReviewApplications: React.FC = () => {
             </h2>
             {appDetails && (
               <div style={{ color: '#333', fontSize: '0.95rem', marginTop: '1rem' }}>
-                <p><strong>Pet ID:</strong> {appDetails.pet_id}</p>
-                <p><strong>Status:</strong> {appDetails.status}</p>
-                <p><strong>Submitted:</strong> {new Date(appDetails.submitted_at).toLocaleString()}</p>
+                <p style={{color: '#000000'}}>
+                  <strong>Pet ID:</strong> {appDetails.pet_id}</p>
+                <p style={{color: '#000000'}}>
+                  <strong>Status:</strong> {appDetails.status}</p>
+                <p style={{color: '#000000'}}>
+                  <strong>Submitted:</strong> {new Date(appDetails.submitted_at).toLocaleString()}</p>
                 {appDetails.reviewed_at && (
                   <p><strong>Reviewed:</strong> {new Date(appDetails.reviewed_at).toLocaleString()}</p>
                 )}

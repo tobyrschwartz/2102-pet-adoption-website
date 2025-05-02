@@ -6,6 +6,36 @@ This file is not meant to be executed directly.
 
 import sqlite3
 from enums import PetStatus
+from user import create_user, Role
+from flask import request, jsonify 
+import bcrypt  
+
+def register_page():
+    """
+    User registration route with hardcoded values.
+    POST: It creates a new user with hardcoded email and password
+    GET: It returns an error
+    """
+    if request.method == 'POST':
+        # Hardcoded user values
+        email = "testuser@example.com"
+        password = "SecureP@ssw0rd"
+        full_name = "Test User"
+        phone = "123-456-7890"
+        role = Role.ADMIN
+
+        hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
+        user_data = {
+            "email": email,
+            "password_hash": hashed_password,
+            "full_name": full_name,
+            "phone": phone,
+            "role": role
+        }
+        return create_user(user_data)
+
+    return jsonify({"error": "Unsupported Content-Type"}), 400
+
 
 def init_db(db_name="petadoption.db", first_run=False):
     """Initialize the SQLite3 database."""
