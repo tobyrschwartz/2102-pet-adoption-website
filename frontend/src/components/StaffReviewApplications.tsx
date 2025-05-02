@@ -23,14 +23,8 @@ interface Response {
 console.log('StaffReviewApplications rendered');
 
 const StaffReviewApplications: React.FC = () => {
-    const { user } = useUser();
-    console.log('👤 user context:', user);
+  const { user, isLoading } = useUser();
 
-    useEffect(() => {
-    console.log('🔥 useEffect fired 🔥');
-    }, []);
-  const { /*user,*/ isLoading } = useUser();
-  console.log('user:', user);
   const navigate = useNavigate();
   const [applications, setApplications] = useState<Application[]>([]);
   const [loading, setLoading] = useState(true);
@@ -39,9 +33,9 @@ const StaffReviewApplications: React.FC = () => {
   const [selectedApplicant, setSelectedApplicant] = useState<Application | null>(null);
   const [appDetails, setAppDetails] = useState<Application | null>(null);
   const [responses, setResponses] = useState<Response[]>([]);
-/*
+
     useEffect(() => {
-        console.log('useEffect triggered');
+
         if (isLoading) {
             console.log('Loading user data...');
             setLoading(true);
@@ -83,7 +77,6 @@ const StaffReviewApplications: React.FC = () => {
         fetchApplications();
 }, [user]);
 
-*/
   const openReviewModal = async (app: Application) => {
     setSelectedApplicant(app);
     setModalOpen(true);

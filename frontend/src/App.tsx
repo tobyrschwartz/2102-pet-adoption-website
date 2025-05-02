@@ -15,7 +15,7 @@ import AdminManagePets from './components/AdminManagePets'
 import Questionnaire from './components/Questionnaire'
 import ConfirmPet from './components/ConfirmPet'
 import StaffReviewQuestionnaires from './components/StaffReviewQuestionnaires';
-import StaffReviewApplications from './components/StaffReviewApplications'
+import StaffReviewApplications from './components/StaffReviewApplications';
 
 
 
