@@ -7,8 +7,8 @@ This file is not meant to be executed directly.
 import sqlite3
 from enums import PetStatus
 from user import create_user, Role
-from flask import request, jsonify 
-import bcrypt  
+from flask import request, jsonify
+import bcrypt
 
 def register_page():
     """
