@@ -75,9 +75,10 @@ def get_application(application_id: int):
     application = dict(app_row)
 
     cursor.execute('''
-        SELECT text, type, answer 
-        FROM questionnaire_responses 
-        WHERE user_id = ?
+        SELECT qr.question_id, q.question_text AS question_text, qr.answer_text 
+        FROM questionnaire_responses qr
+        JOIN questions q ON qr.question_id = q.question_id
+        WHERE qr.user_id = ?
     ''', (application['user_id'],))
     responses = [dict(row) for row in cursor.fetchall()]
     conn.close()
@@ -107,7 +108,7 @@ def get_all_applications():
             a.reviewed_at,
             a.reviewer_id
         FROM applications a
-        JOIN users u ON a.user_id = u.id
+        JOIN users u ON a.user_id = u.user_id
     ''')
     applications = cursor.fetchall()
     conn.close()

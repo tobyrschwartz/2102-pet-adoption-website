@@ -11,7 +11,7 @@ from pets import (get_all_pets, get_pet, create_pet as create_pet_handler,
                  update_pet, delete_pet, search_pets, update_pet_status,
                  get_species, get_breeds)
 from apply import (create_application, get_application, update_application_status,
-                  get_user_applications, get_applications_by_status, get_all_applications)
+                   get_applications_by_status, get_all_applications)
 from questionnaire import (approve_questionnaire, get_answered_questionnaire,
                            get_open_questionnaires,set_questionnaire,
                            get_number_of_open_questionnaires,
@@ -296,16 +296,16 @@ def applications_route():
         return get_all_applications()
     return get_all_apps_wrapper()
 
-@app.route('/api/applications/<int:app_id>', methods=['GET', 'PUT'])
+@app.route('/api/applications/<int:app_id>', methods=['GET', 'POST'])
 def application_detail_route(app_id):
     """
     Application detail route.
     GET: Get details of a specific application
-    PUT: Update an application status (requires STAFF role)
+    POST: Update an application status (requires STAFF role)
     """
     if request.method == 'GET':
         return get_application(app_id)
-    if request.method == 'PUT':
+    if request.method == 'POST':
         @login_required(Role.STAFF)
         def update_app_wrapper():
             data = request.json
