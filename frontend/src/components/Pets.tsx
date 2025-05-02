@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useUser } from '../context/UserContext';
 import PetCard from './PetCard.tsx';
 import './Pets.css'
 
@@ -13,6 +14,9 @@ interface Pet {
 }
 
 const PetsList: React.FC = () => {
+    const { user } = useUser(); // Get user from context
+    const [isUserApproved, setIsUserApproved] = useState<boolean>(false);
+    const [hasSubmittedQuestionnaire, setHasSubmittedQuestionnaire] = useState<boolean>(false);
     const [pets, setPets] = useState<Pet[]>([]);
     const [error, setError] = useState<string>('');
     const [showFilter, setShowFilter] = useState<boolean>(false);
@@ -23,6 +27,33 @@ const PetsList: React.FC = () => {
         breed: '',
         status: 'AVAILABLE'
     });
+
+    // Check if user is approved
+    useEffect(() => {
+        if (user) {
+            setIsUserApproved(!!user.approved);
+            checkQuestionnaireStatus();
+        }
+    }, [user]);
+
+    // Check if user has submitted a questionnaire
+    const checkQuestionnaireStatus = async () => {
+        if (!user) return;
+        
+        try {
+            const response = await fetch('http://127.0.0.1:5000/api/questionnaires/hasOpen', {
+                method: 'GET',
+                credentials: 'include',
+            });
+            
+            if (response.ok) {
+                const data = await response.json();
+                setHasSubmittedQuestionnaire(data.has_open);
+            }
+        } catch (err) {
+            console.error('Error checking questionnaire status:', err);
+        }
+    };
 
     // Fetch all pets initially
     useEffect(() => {
@@ -73,7 +104,12 @@ const PetsList: React.FC = () => {
     };
 
     const renderPetCard = (pet: Pet) => (
-        <PetCard key={pet.id} pet={pet} />
+        <PetCard 
+            key={pet.id} 
+            pet={pet}
+            isUserApproved={isUserApproved}
+            hasSubmittedQuestionnaire={hasSubmittedQuestionnaire}
+        />
     );
 
     return (

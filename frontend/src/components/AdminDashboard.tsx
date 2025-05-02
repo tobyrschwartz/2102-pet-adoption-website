@@ -7,26 +7,25 @@ const Dashboard: React.FC = () => {
     const isStaff = user && user.role >= 2; 
     const isAdmin = user && user.role === 3; 
     const navigate = useNavigate();
-    const [openApplications, setOpenApplications] = useState<number>(0);
+    const [openQuestionnaires, setOpenQuestionnaires] = useState<number>(0);
 
     useEffect(() => {
-
         if (!isStaff) {
             navigate('/unauthorized');
         }
-        // Fetch the amount of open applications from the backend
-        const fetchOpenApplications = async () => {
+        // Fetch the amount of open questionnaires from the backend
+        const fetchOpenQuestionnaires = async () => {
             try {
-                const response = await fetch('/api/applications/count?status=open');
+                const response = await fetch('/api/questionnaires/count?status=open');
                 const data = await response.json();
-                setOpenApplications(data.count);
+                setOpenQuestionnaires(data.count);
             } catch (error) {
-                console.error('Error fetching open applications:', error);
+                console.error('Error fetching open questionnaires:', error);
             }
         };
 
-        fetchOpenApplications();
-    }, [user, isStaff]);
+        fetchOpenQuestionnaires();
+    }, [user, isStaff, navigate]);
 
     return (
         <div
@@ -41,13 +40,6 @@ const Dashboard: React.FC = () => {
                 <h1>Admin Dashboard</h1>
                 <div style={{ marginTop: '20px' }}>
                     <section style={{ marginBottom: '20px' }}>
-                        <h2>User Management</h2>
-                        <button 
-                        onClick={() => navigate('/admin/users')}
-                        style={{ marginRight: '10px' }}>View Users</button>
-                        {isAdmin && <button>Add User</button>}
-                    </section>
-                    <section style={{ marginBottom: '20px' }}>
                         <h2>Pet Management</h2>
                         <button 
                         onClick={() => navigate('/pets')}
@@ -56,16 +48,16 @@ const Dashboard: React.FC = () => {
                         onClick={() => navigate('/admin/pets')}>Manage Pets</button>
                     </section>
                     <section>
-                        <h2>Applications</h2>
-                        <p>There are {openApplications} open applications.</p>
+                        <h2>Questionnaires</h2>
+                        <p>There are {openQuestionnaires} open questionnaires.</p>
                         <button
                         onClick={() => navigate('/staff/review')}>
-                            Review Applications
+                            Review Questionnaires
                             </button>
                         {isAdmin && (
                             <button
                             onClick={() => navigate('/admin/applications')}
-                            style={{ marginLeft: '10px' }}>Manage Applications</button>
+                            style={{ marginLeft: '10px' }}>Manage Questionnaires</button>
                         )}
                     </section>
                 </div>

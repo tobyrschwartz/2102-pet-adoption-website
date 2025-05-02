@@ -236,22 +236,42 @@ const AdminManagePets: React.FC = () => {
         </div>
     );
 
+    // Apply scrollable container style directly to the wrapper div
+    const scrollableContainerStyle: React.CSSProperties = {
+        height: '100vh',
+        overflowY: 'auto',
+        width: '100%',
+        position: 'relative'
+    };
+
     return (
-        <div className="admin-pets-container">
-            <h1>Manage Pets</h1>
-            
-            {error && <div className="error-message">{error}</div>}
-            
-            <button 
-                className="add-pet-btn"
-                onClick={() => setShowAddForm(true)}
-            >
-                Add New Pet
-            </button>
+        <div style={scrollableContainerStyle}>
+            <div className="admin-pets-container">
+                <h1>Manage Pets</h1>
+                
+                {error && <div className="error-message">{error}</div>}
+                
+                <button 
+                    className="add-pet-btn"
+                    onClick={() => setShowAddForm(true)}
+                >
+                    Add New Pet
+                </button>
+                
+                <div className="admin-pet-list">
+                    {loading ? (
+                        <p>Loading pets...</p>
+                    ) : pets.length > 0 ? (
+                        pets.map(pet => <AdminPetCard key={pet.pet_id} pet={pet} />)
+                    ) : (
+                        <p>No pets found. Add some pets to get started.</p>
+                    )}
+                </div>
+            </div>
             
             {/* Add Pet Form */}
             {showAddForm && (
-                <div className="modal-overlay">
+                <div className="modal-overlay" style={{ overflow: 'auto' }}>
                     <div className="modal-content">
                         <h2>Add New Pet</h2>
                         <form onSubmit={handleAddPet}>
@@ -357,7 +377,7 @@ const AdminManagePets: React.FC = () => {
             
             {/* Edit Pet Form */}
             {showEditForm && currentPet && (
-                <div className="modal-overlay">
+                <div className="modal-overlay" style={{ overflow: 'auto' }}>
                     <div className="modal-content">
                         <h2>Edit Pet</h2>
                         <form onSubmit={handleUpdatePet}>
@@ -462,16 +482,6 @@ const AdminManagePets: React.FC = () => {
                     </div>
                 </div>
             )}
-            
-            <div className="admin-pet-list">
-                {loading ? (
-                    <p>Loading pets...</p>
-                ) : pets.length > 0 ? (
-                    pets.map(pet => <AdminPetCard key={pet.pet_id} pet={pet} />)
-                ) : (
-                    <p>No pets found. Add some pets to get started.</p>
-                )}
-            </div>
         </div>
     );
 };
