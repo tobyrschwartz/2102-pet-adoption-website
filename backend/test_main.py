@@ -1,5 +1,5 @@
 """Tests for main.py"""
-
+#pylint: disable=redefined-outer-name
 from unittest.mock import patch
 import pytest
 from main import app
@@ -17,23 +17,6 @@ def mock_get_user_role():
     """Mocking get_user_role() for testing"""
     with patch('main.get_user_role') as mock:
         yield mock
-
-'''def test_create_user(client):
-    """Test user registration using special-case logic in /api/users"""
-    with client.session_transaction() as sess:
-        sess['user_id'] = 1  # Simulate admin session
-
-    with patch('main.get_user_role') as mock_role:
-        mock_role.return_value = Role.ADMIN
-        response = client.post('/api/users', json={
-            'username': 'testuser',
-            'password': 'testpass',
-            'email': 'testuser@example.com',
-            'full_name': 'Test User'
-        })
-        assert response.status_code == 201
-        assert 'user_id' in response.json'''
-
 
 def test_not_logged_in(client):
     """Tests if a user is not logged in"""
@@ -71,7 +54,7 @@ def test_login(mock_login, client):
     mock_login.return_value = ({"message": "Login successful"}, 200)
     response = client.post('/login', json={'email': 'test@example.com', 'password': 'secret'})
     assert response.status_code == 200
-    mock_login.assert_called_once_with('test@example.com', b'secret')
+    mock_login.assert_called_once_with('test@example.com', 'secret')
 
 @patch('main.logout')
 def test_logout(mock_logout, client):
@@ -96,23 +79,3 @@ def test_create_pet_no_permission(mock_get_user_role, client):
     response = client.post('/api/pets', json={})
     assert response.status_code == 403
     assert response.json == {"error": "You do not have permission to access this resource"}
-
-'''@patch('main.get_user_role')
-def test_create_pet_success(mock_get_user_role, client):
-    """Tests that we can create a pet (if we have admin permission)"""
-    mock_get_user_role.return_value = Role.STAFF
-    with client.session_transaction() as sess:
-        sess['user_id'] = 1
-
-    response = client.post('/api/pets', json={
-        'name': 'Fido',
-        'species': 'Dog',
-        'breed': 'Labrador',
-        'age': 3,
-        'description': 'Friendly dog',
-        'status': 'AVAILABLE',
-        'image_url': 'http://example.com/image.jpg'
-    })
-
-    assert response.status_code == 201
-    assert "message" in response.json or "id" in response.json'''
