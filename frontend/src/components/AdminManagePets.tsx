@@ -90,7 +90,7 @@ const AdminManagePets: React.FC = () => {
     const handleAddPet = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
-            const response = await fetch('http://127.0.0.1:5000/api/pets', {
+            const response = await fetch('http://localhost:5000/api/pets', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -126,8 +126,8 @@ const AdminManagePets: React.FC = () => {
         if (!currentPet) return;
         
         try {
-            const response = await fetch(`http://127.0.0.1:5000/api/pets/${currentPet.pet_id}`, {
-                method: 'PUT',
+            const response = await fetch(`http://localhost:5000/api/pets/${currentPet.pet_id}`, {
+                method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
@@ -154,7 +154,7 @@ const AdminManagePets: React.FC = () => {
         }
         
         try {
-            const response = await fetch(`http://127.0.0.1:5000/api/pets/${petId}`, {
+            const response = await fetch(`http://localhost:5000/api/pets/${petId}`, {
                 method: 'DELETE',
                 credentials: 'include',
             });
@@ -172,8 +172,8 @@ const AdminManagePets: React.FC = () => {
 
     const handleUpdateStatus = async (petId: number, newStatus: string) => {
         try {
-            const response = await fetch(`http://127.0.0.1:5000/api/pets/${petId}/status`, {
-                method: 'PUT',
+            const response = await fetch(`http://localhost:5000/api/pets/${petId}/status`, {
+                method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
@@ -201,7 +201,7 @@ const AdminManagePets: React.FC = () => {
     const AdminPetCard: React.FC<{ pet: Pet }> = ({ pet }) => (
         <div className="admin-pet-card" key={pet.pet_id}>
             <img 
-                src={`http://127.0.0.1:5000${pet.pictureUrl}`} 
+                src={`http://localhost:5000${pet.pictureUrl}`} 
                 alt={pet.name} 
                 className="pet-image" 
             />

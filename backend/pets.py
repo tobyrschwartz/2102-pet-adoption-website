@@ -29,7 +29,7 @@ def create_pet(pet_data):
     cursor = conn.cursor()
     cursor.execute('''
         INSERT INTO pets (name, species, breed, age, description, status, image_url)
-        VALUES (?, ?, ?, ?, ?, ?)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
     ''', (pet_data['name'], pet_data['species'], pet_data['breed'], pet_data['age'],
             pet_data['description'],
             pet_data.get('status', PetStatus.AVAILABLE), pet_data.get('image_url', '')))

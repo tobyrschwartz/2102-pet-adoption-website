@@ -206,17 +206,17 @@ def pets_route():
                            PetStatus[request.args.get('status')])
     return get_all_pets()
 
-@app.route('/api/pets/<int:pet_id>', methods=['GET', 'PUT', 'DELETE'])
+@app.route('/api/pets/<int:pet_id>', methods=['GET', 'POST', 'DELETE'])
 def pet_detail_route(pet_id):
     """
     Pet detail route.
     GET: Get details of a specific pet
-    PUT: Update a pet (requires STAFF role)
+    POST: Update a pet (requires STAFF role)
     DELETE: Delete a pet (requires STAFF role)
     """
     if request.method == 'GET':
         return get_pet(pet_id)
-    if request.method == 'PUT':
+    if request.method == 'POST':
         @login_required(Role.STAFF)
         def update_pet_wrapper():
             return update_pet(pet_id)
@@ -228,7 +228,7 @@ def pet_detail_route(pet_id):
         return delete_pet_wrapper()
     return jsonify({"error": "Method not allowed"}), 405
 
-@app.route('/api/pets/<int:pet_id>/status', methods=['PUT'])
+@app.route('/api/pets/<int:pet_id>/status', methods=['POST'])
 @login_required(Role.STAFF)
 def update_pet_status_route(pet_id):
     """
