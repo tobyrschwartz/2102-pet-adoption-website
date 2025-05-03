@@ -1,76 +1,56 @@
 import { Link } from "react-router-dom";
-import ItemList from './ItemList';
+import { useUser, roleToText } from "../context/UserContext";
+import './Home.css';
 
 const Home = () => {
+    const { user } = useUser();
+
+    const handleProfileToggle = () => {
+        const profileContainer = document.getElementById('profile-container');
+        if (user && profileContainer) {
+            if (profileContainer.innerHTML.trim() !== "") {
+                profileContainer.innerHTML = "";
+            } else {
+                profileContainer.innerHTML = `
+                    <div>
+                        <p><strong>Name:</strong> ${user.full_name}</p>
+                        <p><strong>Role:</strong> ${roleToText[user.role]}</p>
+                        <p><strong>Approval Status:</strong> ${user.approved ? "Approved" : "Not Approved"}</p>
+                    </div>
+                `;
+            }
+        }
+    };
+
     return (
-        
-        <div style={{ textAlign: "center", padding: "20px" }}>
-            <div style={{ position: "absolute", top: "10px", right: "10px" }}>
-            <button
-            onClick={() => {
-                const profileContainer = document.getElementById('profile-container');
-                if (profileContainer) {
-                    if (profileContainer.innerHTML.trim() !== "") {
-                        profileContainer.innerHTML = ""; // Clear the profile if already displayed
-                    } else {
-                        const userId = localStorage.getItem('userId');
-                        const full_name = localStorage.getItem('full_name');
-                        const role = localStorage.getItem('role');
-                        if (userId && full_name && role) {
-                            profileContainer.innerHTML = `
-                                <div>
-                                    <p><strong>Name:</strong> ${full_name}</p>
-                                    <p><strong>Role:</strong> ${role}</p>
-                                </div>
-                            `;
-                        } else {
-                            profileContainer.innerHTML = `
-                                <div>
-                                    <p><strong>Name:</strong> Guest</p>
-                                    <p><strong>Role:</strong> Guest</p>
-                                </div>
-                            `;
-                        }
-                    }
-                }
-            }}
-            style={{ 
-            borderRadius: "20px", 
-            padding: "10px 15px", 
-            backgroundColor: "#28A745", 
-            color: "white", 
-            border: "none", 
-            cursor: "pointer" 
-            }}>
-            My Profile
-            </button>
-            <div id="profile-container" style={{ textAlign: "right", marginTop: "10px" }}></div>
+        <div className="home-container">
+            {user && (
+                <div className="profile-toggle">
+                    <button className="profile-btn" onClick={handleProfileToggle}>
+                        My Profile
+                    </button>
+                    <div id="profile-container" className="profile-container"></div>
+                </div>
+            )}
+            <div className="home-content">
+                <h1>Welcome to Pet Adoption</h1>
+                <p>Your journey to finding a new friend starts here.</p>
+                {user && !user.approved && (
+                    <p className="approval-warning">
+                        Your account has not been approved for adoption yet.
+                    </p>
+                )}
+                {!user ? (
+                    <Link to="/login" className="home-link">
+                        <button className="home-button">Login</button>
+                    </Link>
+                ) : (
+                    <Link to="/pets" className="home-link">
+                        <button className="home-button">See Available Pets</button>
+                    </Link>
+                )}
             </div>
-            <h1>Welcome to Pet Adoption</h1>
-            <p>Your journey to finding a new friend starts here.</p>
-            <Link to="/login" style={{ textDecoration: "none" }}>
-                <button style={{ 
-                    borderRadius: "20px", 
-                    padding: "10px 20px", 
-                    backgroundColor: "#007BFF", 
-                    color: "white", 
-                    border: "none", 
-                    cursor: "pointer" 
-                }}>
-                    Login
-                </button>
-            </Link>
-
-            <hr style={{marginTop: '30px', marginBottom: '20px'}} />
-            <div style={{ textAlign: 'center' }}> 
-                <h2>Data from Backend (Steel Thread Example):</h2>
-                <ItemList />
-            </div>
-
         </div>
-        
-        
-        
     );
 };
 

@@ -28,10 +28,11 @@ def create_pet(pet_data):
     conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute('''
-        INSERT INTO pets (name, species, breed, age, description, status)
+        INSERT INTO pets (name, species, breed, age, description, status, image_url)
         VALUES (?, ?, ?, ?, ?, ?)
     ''', (pet_data['name'], pet_data['species'], pet_data['breed'], pet_data['age'],
-            pet_data['description'], pet_data.get('status', PetStatus.AVAILABLE)))
+            pet_data['description'],
+            pet_data.get('status', PetStatus.AVAILABLE), pet_data.get('image_url', '')))
     conn.commit()
     pet_id = cursor.lastrowid
     conn.close()
@@ -151,7 +152,7 @@ def search_pets(species: str = "", breed: str = "", status: PetStatus = PetStatu
         params.append(breed)
     if status:
         query += " AND status = ?"
-        params.append(status)
+        params.append(status.value)
     cursor.execute(query, params)
     pets = cursor.fetchall()
     conn.close()
@@ -160,4 +161,38 @@ def search_pets(species: str = "", breed: str = "", status: PetStatus = PetStatu
     # Convert pets to a list of dictionaries
     pets = [dict(pet) for pet in pets]
 
-    return jsonify([pets]), 200
+    return jsonify(pets), 200
+
+def get_breeds():
+    """
+    Retrieve all unique breeds from the database.
+    
+    :return: JSON response with a list of unique breeds
+    """
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute('SELECT DISTINCT breed FROM pets')
+    breeds = cursor.fetchall()
+    conn.close()
+    if not breeds:
+        return jsonify({"error": "No breeds found"}), 404
+    # Convert breeds to a list of strings
+    breeds = [breed[0] for breed in breeds]
+    return jsonify(breeds), 200
+def get_species():
+    """
+    Retrieve all unique species from the database.
+
+    :return: JSON response with a list of unique species
+    :raises: 404 if no species are found
+    """
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute('SELECT DISTINCT species FROM pets')
+    species = cursor.fetchall()
+    conn.close()
+    if not species:
+        return jsonify({"error": "No species found"}), 404
+    # Convert species to a list of strings
+    species = [specie[0] for specie in species]
+    return jsonify(species), 200

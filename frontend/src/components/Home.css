@@ -1,0 +1,73 @@
+/* Home.css */
+
+.home-container {
+    background-image: url('../images/homepage.png'); 
+    background-size: cover;
+    background-position: center;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    text-align: center;
+    padding: 20px;
+    color: white;
+    overflow: hidden;
+}
+
+.home-content {
+    background-color: rgba(0, 0, 0, 0.6);
+    padding: 40px;
+    border-radius: 15px;
+    max-width: 600px;
+}
+
+.home-button {
+    border-radius: 20px;
+    padding: 10px 20px;
+    background-color: #007BFF;
+    color: white;
+    border: none;
+    cursor: pointer;
+    font-size: 1rem;
+    margin-top: 20px;
+    transition: background-color 0.3s ease;
+}
+
+.home-button:hover {
+    background-color: #0056b3;
+}
+
+.home-link {
+    text-decoration: none;
+}
+
+.approval-warning {
+    color: #ff6b6b;
+    font-weight: bold;
+    margin-top: 10px;
+}
+
+.profile-toggle {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    text-align: right;
+}
+
+.profile-btn {
+    border-radius: 20px;
+    padding: 10px 15px;
+    background-color: #28A745;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+.profile-container {
+    margin-top: 10px;
+    background-color: rgba(255, 255, 255, 0.1);
+    padding: 10px;
+    border-radius: 10px;
+    color: white;
+}

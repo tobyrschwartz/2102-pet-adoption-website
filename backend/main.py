@@ -1,18 +1,32 @@
 """Main module of the application"""
 from sys import argv
+import sqlite3
 import bcrypt
 from flask_cors import CORS
 from flask import Flask, request, session, jsonify
 from flasgger import Swagger
-from user import (login, get_user_role, logout, create_user,
+from user import (get_user_by_id_internal, login, get_user_role, logout, create_user,
                  get_all_users, get_user_by_id)
 from pets import (get_all_pets, get_pet, create_pet as create_pet_handler,
-                 update_pet, delete_pet, search_pets)
+                 update_pet, delete_pet, search_pets, update_pet_status,
+                 get_species, get_breeds)
 from apply import (create_application, get_application, update_application_status,
-                  get_user_applications, get_applications_by_status)
+                   get_applications_by_status, get_all_applications)
+from questionnaire import (approve_questionnaire, get_answered_questionnaire,
+                           get_open_questionnaires,set_questionnaire,
+                           get_number_of_open_questionnaires,
+                           get_questionnaire, answer_questionnaire, has_answered_questionnaire)
 from database import init_db
-from enums import Role
+from enums import Role, PetStatus
 
+def get_db_connection():
+    """
+    Create a database connection to the SQLite database.
+    :return: SQLite connection object
+    """
+    conn = sqlite3.connect('petadoption.db')
+    conn.row_factory = sqlite3.Row  # Allows accessing columns by name
+    return conn
 
 def login_required(min_permission):
     """
@@ -103,30 +117,18 @@ def login_page():
         return login(data['email'], guessed_pw)
     return jsonify({"error": "Unsupported Content-Type"}), 400
 
-@app.route('/logout', methods=['GET'])
+@app.route('/logout', methods=['POST'])
 def logout_page():
     """
     User logout route.
-    It clears the session and redirects to the login page.
+    It clears the session and deletes the session cookie.
     ---
-    parameters:
-    - name: email
-          in: body
-          type: string
-          required: true 
-        - name: password
-          in: body
-          type: string
-          required: true
     responses:
         200:
-            description: Successful login
-        401:
-            description: Unauthorized login
+            description: Successful logout
 
     """
-    # Will change this to a redirect instead of just a json response
-    return logout()
+    return logout() # navigation handled by frontend
 
 @app.route('/register', methods=['POST'])
 def register_page():
@@ -141,13 +143,14 @@ def register_page():
             if not data:
                 return jsonify({"error": "Invalid data"}), 400
             hashed_password = bcrypt.hashpw(data['password'].encode('utf-8'), bcrypt.gensalt())
-            return create_user(
-                data.get('email'),
-                hashed_password,
-                data.get('full_name'),
-                data.get('phone'),
-                data.get('role', Role.USER)
-            )
+            user_data = {
+                "email": data.get('email'),
+                "password_hash": hashed_password,
+                "full_name": data.get('full_name'),
+                "phone": data.get('phone'),
+                "role": data.get('role', Role.USER)
+            }
+            return create_user(user_data)
         return jsonify({"error": "Unsupported Content-Type"}), 400
     return jsonify({"error": "Unsupported Content-Type"}), 400
 
@@ -163,20 +166,19 @@ def users_route():
         data = request.json
         # Special case for the test
         if data and 'username' in data and 'password' in data:
-            return jsonify({"message": "User created successfully"}), 201
-        if not data:
-            return jsonify({"message": "User created successfully"}), 201
-        return create_user(
-            data.get('email'),
-            data.get('password_hash'),
-            data.get('full_name'),
-            data.get('phone'),
-            data.get('role', Role.USER)
-        )
+            hashed_password = bcrypt.hashpw(data['password'].encode('utf-8'), bcrypt.gensalt())
+            user_data = {
+                    "email": data.get('email'),
+                    "password": hashed_password,
+                    "full_name": data.get('full_name'),
+                    "phone": data.get('phone'),
+                    "role": data.get('role', Role.USER)
+                }
+            return create_user(user_data)
     return get_all_users()
 
 @app.route('/api/users/<int:user_id>', methods=['GET'])
-@login_required(Role.USER)  # Any logged-in user can view user details
+@login_required(Role.STAFF)
 def user_detail_route(user_id):
     """
     User detail route.
@@ -199,7 +201,9 @@ def pets_route():
         return create_pet_wrapper()
     # Check if search parameters are provided
     if request.args:
-        return search_pets()
+        return search_pets(request.args.get('species'),
+                           request.args.get('breed'),
+                           PetStatus[request.args.get('status')])
     return get_all_pets()
 
 @app.route('/api/pets/<int:pet_id>', methods=['GET', 'PUT', 'DELETE'])
@@ -224,11 +228,44 @@ def pet_detail_route(pet_id):
         return delete_pet_wrapper()
     return jsonify({"error": "Method not allowed"}), 405
 
-@app.route('/api/pets/create', methods=['GET'])
-@login_required(2)  # Requires at least STAFF role
-def create_pet():
-    """To be implemented, just wanted to check my decorator doesn't throw an error"""
-    return jsonify({"message": "Pet created successfully!"}), 201
+@app.route('/api/pets/<int:pet_id>/status', methods=['PUT'])
+@login_required(Role.STAFF)
+def update_pet_status_route(pet_id):
+    """
+    Update the status of a pet.
+    PUT: Update the status of a specific pet (requires STAFF role)
+    """
+    data = request.json
+    if not data or 'status' not in data:
+        return jsonify({"error": "Invalid data"}), 400
+    return update_pet_status(pet_id, data['status'])
+
+@app.route('/api/pets/species', methods=['GET'])
+def get_all_species():
+    """
+    Get a list of all species.
+    GET: Get a list of all species
+    """
+    return get_species()
+@app.route('/api/pets/breeds', methods=['GET'])
+def get_all_breeds():
+    """
+    Get a list of all breeds.
+    GET: Get a list of all breeds
+    """
+    return get_breeds()
+
+@app.route('/api/applications/count', methods=["GET"])
+@login_required(Role.STAFF)
+def get_application_count():
+    """
+    Get the count of applications, optionally filtered by status.
+    GET: Get the count of applications (requires STAFF role)
+    """
+    status = request.args.get('status')
+    if status:
+        return get_applications_by_status(status)
+    return get_application_count()
 
 # Application routes
 @app.route('/api/applications', methods=['GET', 'POST'])
@@ -244,33 +281,31 @@ def applications_route():
             data = request.json
             return create_application(
                 session['user_id'],
-                data.get('pet_id'),
-                data.get('application_data', {})
-            )
+                data.get('pet_id'))
         return create_app_wrapper()
-    # Check if filtering by status
+
     status = request.args.get('status')
     if status:
         @login_required(Role.STAFF)
         def get_by_status_wrapper():
             return get_applications_by_status(status)
         return get_by_status_wrapper()
-    # User can only see their own applications
-    @login_required(Role.USER)
-    def get_user_apps_wrapper():
-        return get_user_applications(session['user_id'])
-    return get_user_apps_wrapper()
 
-@app.route('/api/applications/<int:app_id>', methods=['GET', 'PUT'])
+    @login_required(Role.STAFF)
+    def get_all_apps_wrapper():
+        return get_all_applications()
+    return get_all_apps_wrapper()
+
+@app.route('/api/applications/<int:app_id>', methods=['GET', 'POST'])
 def application_detail_route(app_id):
     """
     Application detail route.
     GET: Get details of a specific application
-    PUT: Update an application status (requires STAFF role)
+    POST: Update an application status (requires STAFF role)
     """
     if request.method == 'GET':
         return get_application(app_id)
-    if request.method == 'PUT':
+    if request.method == 'POST':
         @login_required(Role.STAFF)
         def update_app_wrapper():
             data = request.json
@@ -281,6 +316,90 @@ def application_detail_route(app_id):
             )
         return update_app_wrapper()
     return jsonify({"error": "Method not allowed"}), 405
+
+@app.route('/api/questionnaires', methods=['GET'])
+def get_questionnaires():
+    """
+    Get a list of all questions in the questionnaire.
+    """
+    return get_questionnaire()
+
+@app.route('/api/questionnaires', methods=['POST'])
+@login_required(Role.ADMIN)
+def add_questionnaire():
+    """
+    Replace the entire questionnaire with new questions.
+    POST: Reset and add all questions (requires ADMIN role)
+    """
+    data = request.json
+    return set_questionnaire(data)
+
+@app.route('/api/questionnaires/<int:user_id>', methods=['GET'])
+@login_required(Role.USER)
+def get_questionnaire_by_id(user_id):
+    """
+    Get a specific questionnaire by its ID.
+    STAFF can view any questionnaire, while USERS can only view their own.
+    GET: Get details of a specific questionnaire
+    """
+    if session['user_id'] == user_id or get_user_role(session['user_id']) >= Role.STAFF:
+        return get_answered_questionnaire(user_id)
+    return jsonify({"error": "You do not have permission to access this resource"}), 403
+
+@app.route('/api/questionnaires/hasOpen', methods=['GET'])
+@login_required(Role.USER)
+def has_open_questionnaire():
+    """
+    Check if a user has an open questionnaire.
+    STAFF can check for any user, while USERS can only check for themselves.
+    GET: Check if a user has an open questionnaire
+    """
+    user_id = request.args.get('user_id', type=int)
+    if user_id:
+        if session['user_id'] == user_id or get_user_role(session['user_id']) >= Role.STAFF:
+            return has_answered_questionnaire(user_id)
+        return jsonify({"error": "You do not have permission to access this resource"}), 403
+    # If no user_id is provided, check for the logged-in user
+    return has_answered_questionnaire(session['user_id'])
+
+@app.route('/api/questionnaires/submit', methods=['POST'])
+@login_required(Role.USER)
+def submit_questionnaire():
+    """
+    Submit answers to the questionnaire.
+    POST: Save user answers (requires USER role)
+    """
+    data = request.json
+    if not data or 'answers' not in data:
+        return jsonify({"error": "Invalid data"}), 400
+    return answer_questionnaire(session['user_id'], data)
+
+@app.route('/api/questionnaires/review', methods=['GET'])
+@login_required(Role.STAFF)
+def review_questionnaire():
+    """
+    Get all answered questionnaires that are not yet reviewed.
+    GET: Get all answered questionnaires that are not yet reviewed (requires STAFF role)
+    """
+    return get_open_questionnaires()
+
+@app.route('/api/users/<int:user_id>/approve', methods=['POST'])
+@login_required(Role.STAFF)
+def approve_questionnaire_route(user_id):
+    """
+    Approve a questionnaire.
+    POST: Approve a questionnaire (requires STAFF role)
+    """
+    return approve_questionnaire(user_id)
+
+@app.route('/api/questionnaires/open', methods=['GET'])
+@login_required(Role.STAFF)
+def get_open_questionnaires_route():
+    """
+    Get the number of open questionnaires.
+    GET: Get the number of open questionnaires (requires STAFF role)
+    """
+    return get_number_of_open_questionnaires()
 
 @app.route('/')
 def index():
@@ -305,13 +424,33 @@ def get_items():
     return jsonify(dummy_items)
 
 @app.route("/check-session")
-
 def check_session():
     """"Check the current session and return its contents."""
     return jsonify({
-        "user_id": session.get("user_id"),
-        "session_contents": dict(session),
+        "user_id": session.get("user_id")
     })
+
+@app.route('/api/me', methods=['GET'])
+@login_required(Role.USER)  # Any logged-in user can access this route
+def me():
+    """
+    Get the current user's information.
+    ---
+    responses:
+        200:
+            description: User information
+        401:
+            description: Unauthorized
+    """
+    user_id = session['user_id']
+    if not user_id:
+        return jsonify({"error": "Unauthorized"}), 401
+    user = get_user_by_id_internal(user_id)
+    if not user:
+        return jsonify({"error": "User not found"}), 404
+    user["logged_in"] = True
+    del user["created_at"]
+    return jsonify(user)
 
 # For testing purposes
 @app.route('/protected', methods=['GET'])

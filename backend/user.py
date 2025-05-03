@@ -1,6 +1,6 @@
 """The module for managing user-related operations."""
 import sqlite3
-from flask import jsonify, session
+from flask import jsonify, make_response, session
 from bcrypt import hashpw
 from enums import Role
 
@@ -13,17 +13,19 @@ def get_db_connection():
     conn.row_factory = sqlite3.Row  # Allows accessing columns by name
     return conn
 
-def create_user(email: str, password_hash: str, full_name: str, phone: str, role: Role):
+def create_user(user_data: dict):
     """
     Creates a new user in the database.
     Assumes password is already hashed.
 
     Args:
-        email (str): User's email (must be unique).
-        password_hash (str): The pre-hashed password.
-        full_name (str): User's full name.
-        phone (str): User's phone number (optional).
-        role (int): User's role (integer value from Role enum).
+        user_data (dict): A dictionary containing user details:
+            - email (str): User's email (must be unique).
+            - password_hash (str): The pre-hashed password.
+            - full_name (str): User's full name.
+            - phone (str): User's phone number (optional).
+            - role (int): User's role (integer value from Role enum).
+            - approved (bool): Whether the user is approved (default is False).
 
     Returns:
         tuple: (dict or None, str or None) - (user_data, error_message)
@@ -33,15 +35,21 @@ def create_user(email: str, password_hash: str, full_name: str, phone: str, role
     cursor = conn.cursor()
     cursor.execute('''
         SELECT COUNT(*) FROM Users WHERE email = ?
-    ''', (email,))
+    ''', (user_data['email'],))
     count = cursor.fetchone()[0]
     if count > 0:
         return jsonify("Email already exists"), 400
     cursor.execute('''
-
-    INSERT INTO Users (email, password_hash, full_name, phone, role)
-    VALUES (?, ?, ?, ?, ?)
-    ''', (email, password_hash, full_name, phone, role))
+        INSERT INTO Users (email, password_hash, full_name, phone, role, approved)
+        VALUES (?, ?, ?, ?, ?, ?)
+    ''', (
+        user_data['email'],
+        user_data['password_hash'],
+        user_data['full_name'],
+        user_data.get('phone', None),
+        user_data['role'],
+        user_data.get('approved', False)
+    ))
     conn.commit()
     user_id = cursor.lastrowid
     conn.close()
@@ -83,6 +91,25 @@ def get_user_by_id(user_id: int):
     if 'password_hash' in user:
         del user['password_hash']
     return jsonify(user), 200
+
+def get_user_by_id_internal(user_id: int):
+    """
+    Retrieve a specific user by their ID.
+
+    :param user_id: ID of the user to retrieve
+    :return: JSON response with the user details
+    """
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute('SELECT * FROM Users WHERE user_id = ?', (user_id,))
+    user = cursor.fetchone()
+    conn.close()
+    if user is None:
+        return jsonify({"error": "User not found"}), 404
+    user = dict(user)
+    if 'password_hash' in user:
+        del user['password_hash']
+    return user
 
 def get_user_by_email(email: str):
     """
@@ -192,11 +219,24 @@ def login(email: str, guessed_password: bytearray):
         return jsonify({"error": "Invalid email or password"}), 401
     guessed_hash = hashpw(guessed_password, hashed_password)
     if guessed_hash == hashed_password:
-        response = {
+        if user.get("role") >= Role.STAFF:
+            response = {
             "message": "Login successful",
             "user_id": user.get("user_id"),
+            "full_name": user.get("full_name"),
             "role": user.get("role"),
-        }
+            "approved": user.get("approved"),
+            "redirect_url": "/admin/dashboard",
+            }
+        else:
+            response = {
+            "message": "Login successful",
+            "user_id": user.get("user_id"),
+            "full_name": user.get("full_name"),
+            "role": user.get("role"),
+            "approved": user.get("approved"),
+            "redirect_url": "/home",
+            }
         session.permanent = True
         session['user_id'] = user.get("user_id")
         return jsonify(response), 200
@@ -208,8 +248,12 @@ def logout():
     
     :return: JSON response with the logout status
     """
+    if 'user_id' not in session:
+        return jsonify({"message": "You're already logged out"}), 200
     session.clear()
     response = {
-        "message": "Logout successful"
+        "message": "Logged out successfully"
     }
-    return jsonify(response), 200
+    resp = make_response(jsonify(response))
+    resp.delete_cookie("session")
+    return resp, 200

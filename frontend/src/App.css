@@ -7,6 +7,10 @@ html, body, #root {
   overflow: hidden;
 }
 
+body {
+  overflow: auto; 
+}
+
 .logo {
   height: 6em;
   padding: 1.5em;

@@ -26,7 +26,6 @@ class QuestionType(str, Enum):
     Each type represents a different kind of question.
     """
     TEXT = "Text" # open-ended text response
-    YES_NO = "Yes/No" # yes or no question
     MULTIPLE_CHOICE = "Multiple Choice" # multiple choice question
 
 class PetStatus(str, Enum):
