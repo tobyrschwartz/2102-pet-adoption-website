@@ -54,7 +54,7 @@ def test_login(mock_login, client):
     mock_login.return_value = ({"message": "Login successful"}, 200)
     response = client.post('/login', json={'email': 'test@example.com', 'password': 'secret'})
     assert response.status_code == 200
-    mock_login.assert_called_once_with('test@example.com', 'secret')
+    mock_login.assert_called_once_with('test@example.com', b'secret')
 
 @patch('main.logout')
 def test_logout(mock_logout, client):
